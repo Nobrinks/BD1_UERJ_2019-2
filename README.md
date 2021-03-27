@@ -3,6 +3,7 @@
 ## Integrantes
 
 * Dennis Ribeiro Paiva - 201610050611
+* Igor Sousa Silva - 201610053411
 * Paulo Victor Coelho - 201610049711
 * Vinicius Sathler - 201610051611
   
