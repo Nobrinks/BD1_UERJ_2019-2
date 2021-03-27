@@ -28,11 +28,11 @@ O parque de diversões 'tomorrowland' é um parque moderno mas muito ganancioso.
     <li>Visitante:<ul><li>CPF: Número inteiro de onze dígitos.</li><li>Nome: String de no máximo 45 caracteres.</li><li>Endereço: String de no máximo 100 caracteres.</li><li>Telefone: Numero inteiro formado por oito ou nove dígitos.</li>
     </ul>
     </li>
-    <li>Cartão:<ul><li>Data: Data no formato aaaa-mm-dd de acordo com o tipo DATE da linguagem mySQL.</li></ul></li>
+    <li>Cartão:<ul><li>Data: Data no formato aaaa-mm-dd de acordo com o tipo DATE da linguagem PostgreSQL.</li></ul></li>
     <li>Brinquedo:<ul><li>Cod_brinquedo: Numero inteiro de cinco dígitos.</li><li>Nome: String de no máximo 45 caracteres.</li><li>Preço: Número real positivo com duas casas decimais de precisão.</li></ul></li>
-    <li>Registra (Cartão-Brinquedo):<ul><li> Hora: registro de hora no formato hh-mm-ss de acordo com o tipo TIME da linguagem mySQL.</li></ul></li>
+    <li>Registra (Cartão-Brinquedo):<ul><li> Hora: registro de hora no formato hh-mm-ss de acordo com o tipo TIME da linguagem PostgreSQL.</li></ul></li>
     <li>Funcionário:<ul><li>CPF: Número inteiro de onze dígitos.</li><li>Nome: String de no máximo 45 caracteres.</li><li>Endereço: String de no máximo 100 caracteres.</li><li>Telefone: Numero inteiro formado por oito ou nove dígitos.</li></ul></li>
-    <li>Registro do funcionario:<ul><li>CPF: número inteiro de onze dígitos</li><li>Nome: String de no máximo 45 caracteres.</li><li>data_de_entrada: Data no formato aaaa-mm-dd de acordo com o tipo DATE da linguagem mySQL.</li><li>data_de_saida: Data no formato aaaa-mm-dd de acordo com o tipo DATE da linguagem mySQL.</li>
+    <li>Registro do funcionario:<ul><li>CPF: número inteiro de onze dígitos</li><li>Nome: String de no máximo 45 caracteres.</li><li>data_de_entrada: Data no formato aaaa-mm-dd de acordo com o tipo DATE da linguagem PostgreSQL.</li><li>data_de_saida: Data no formato aaaa-mm-dd de acordo com o tipo DATE da linguagem PostgreSQL.</li>
 </ul></ul>
 
 </br>
