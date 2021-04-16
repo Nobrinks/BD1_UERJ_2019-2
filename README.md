@@ -9,10 +9,19 @@
   
 ## Introdução
 
-Neste trabalho serão apresentados todos os passos de modelagem de um projeto básico de banco de dados, da descrição do minimundo até sua implementação funcional.
-O tema abordado será o gerenciamento do cartão de visita de um visitante em um parque de diversões.
+A Amazon DynamoDB é um banco de dados de Chave-Valor (Key-Value) e de documentos. Cada chave só pode ter um valor.
+
+Na ADDB as tabelas são guardadas em partições (Partitions) que seriam a parte fisica, como o ADDB lida com isso é totalmente transparente para a nossa aplicação. Só sabemos que ele tem SSDs fazendo a alocação e replicados automatricamente entre diferentes Data Centers da AWS. Lembrando que ele é alocado inicialmente no Data center mais proximo e depois replicado.
+[here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html)
+
+Precisamos definir uma Partition Key, que seria uma Primary Key no relacional.
+Caso tenhamos o mesmo valor de Partition Key, existe a Sort Key e então it's possible for two items to have the same partition key value. However, those two items must have different sort key values.
+
 
 ## Teoria: Descrição do BD e sua estrutura (relacional, orientado a colunas, documentos, XML etc);
+
+Amazon DynamoDB is a key-value and document database that delivers single-digit-millisecond performance at any scale. It's a fully managed, multi-region, multi-master, durable database with built-in security, backup and restore, and in-memory caching for internet-scale applications
+
 ## Teoria: Arquitetura (Desenho da arquitetura dos componentes do BD);
 ## Teoria: descrever como ocorre o processamento de consultas no BD, componente envolvidos;
 ## Teoria: descrever como ocorre a otimização de consultas no BD, componente envolvidos;
