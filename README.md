@@ -23,9 +23,12 @@ Caso tenhamos o mesmo valor de Partition Key, existe a Sort Key e então it's po
 Amazon DynamoDB is a key-value and document database that delivers single-digit-millisecond performance at any scale. It's a fully managed, multi-region, multi-master, durable database with built-in security, backup and restore, and in-memory caching for internet-scale applications
 
 ## Teoria: Arquitetura (Desenho da arquitetura dos componentes do BD);
+[Arquitetura da vida](https://medium.com/swlh/architecture-of-amazons-dynamodb-and-why-its-performance-is-so-high-31d4274c3129#:~:text=DynamoDB%20uses%20a%20cluster%20of,the%20DynamoDB%20has%203%20machines.)
 ## Teoria: descrever como ocorre o processamento de consultas no BD, componente envolvidos;
 [How it works](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
 ## Teoria: descrever como ocorre a otimização de consultas no BD, componente envolvidos;
+[Index](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SQLtoNoSQL.Indexes.Creating.html)
+[Scans vs queries](https://medium.com/redbox-techblog/tuning-dynamodb-scans-vs-queries-110ef6c3f671)
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
 ## Teoria: descrever como ocorre o controle de concorrência no BD;
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
