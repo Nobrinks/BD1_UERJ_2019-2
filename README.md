@@ -28,6 +28,7 @@ Amazon DynamoDB is a key-value and document database that delivers single-digit-
 [How it works](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
 ## Teoria: descrever como ocorre a otimização de consultas no BD, componente envolvidos;
 [Index](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SQLtoNoSQL.Indexes.Creating.html)
+
 [Scans vs queries](https://medium.com/redbox-techblog/tuning-dynamodb-scans-vs-queries-110ef6c3f671)
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
 ## Teoria: descrever como ocorre o controle de concorrência no BD;
