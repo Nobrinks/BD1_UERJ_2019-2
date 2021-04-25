@@ -24,6 +24,7 @@ Amazon DynamoDB is a key-value and document database that delivers single-digit-
 
 ## Teoria: Arquitetura (Desenho da arquitetura dos componentes do BD);
 ## Teoria: descrever como ocorre o processamento de consultas no BD, componente envolvidos;
+[How it works](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
 ## Teoria: descrever como ocorre a otimização de consultas no BD, componente envolvidos;
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
 ## Teoria: descrever como ocorre o controle de concorrência no BD;
