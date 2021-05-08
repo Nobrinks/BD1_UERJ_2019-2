@@ -24,6 +24,63 @@ Amazon DynamoDB is a key-value and document database that delivers single-digit-
 
 ## Teoria: Arquitetura (Desenho da arquitetura dos componentes do BD);
 [Arquitetura da vida](https://medium.com/swlh/architecture-of-amazons-dynamodb-and-why-its-performance-is-so-high-31d4274c3129#:~:text=DynamoDB%20uses%20a%20cluster%20of,the%20DynamoDB%20has%203%20machines.)
+
+DynamoDB é um banco de dados NoSQL fornecido pela Amazon Web Service (AWS).Visto de longe, 
+DynamoDB é basicamente um armazenamento de chaves-valores. Pode ser entendido como
+um "hash-map" ajudado por alguns armazenamentos resistentes. 
+A duas operações mais importantes são: Get e Put.
+
+O que diferencia o DynamoDB é sua extrema rapidez em *particionamentos*.
+Para conseguir um escalonamento horizontal, ele atribui dados para diferentes
+partições que são hospedados em maquinas distintas, e quanto mais dados 
+mais partições e maquinas são utilizadas, sob demanda.
+
+
+-----------------
+
+A PRIMEIRA IMAGEM DO CIRCULO! 
+
+-----------------
+Quando inserimos um par de valores-chave no DynamoDB,a chave é primeiro transformada em um inteiro, I.
+O par de valores-chave é então armazenado na máquina que encontraremos 
+primeiro se começarmos de I e andarmos no sentido horário ao redor do anel . 
+Portanto, as chaves que são hash para (1000, 2⁶⁴-1] e [0, 100] 
+são armazenadas na máquina A. Portanto, a máquina B armazena as chaves
+cujos valores de hash estão entre 100 e 2000. O resto é armazenado na máquina C.
+
+
+Quando se recebe muitos dados, a ponto de sobrecarregar uma maquina pode-se
+adicionar outra maquina que irá pegar parte dos dados da maquina sobrecarregada.
+Um Token então é gerado de maneira diferente para a nova maquina para demonstrar que
+contém os parte dos dados da máquina sobrecarregada.
+
+Se um conjunto de Tokens recebe muitos dados pode-se progressivamente criar mais máquinas,
+e fazer o dado ficar distribuido entre mais máquinas do mesmo conjunto de tokens.
+Se muitos dados começarem a serem deletados, e algumas maquinas começarem a ficar liberadas,
+pode-se juntar várias maquinas para comportar todos os dados dessas maquinas com poucos dados
+
+DynamoDB também replica os dados N vezes pelas outras maquinas.
+(Assumiremos N = 3 pois é o mais comum no AWS)
+
+Quando se recebe um request de salvar dados, ele passa ele para as duas próximas máquinas.
+Logo o dado estará armazenado na máquina A, B e C. Então A só manda uma resposta pro cliente de
+salvo, quando ele receber uma resposta de B e C comprovando que neles foram salvos também.
+
+Porém não necessita de resposta de todas as máquinas que foram feitas as replicas, ele só precisa
+da resposta de W maquinas garantir que foi salvo.(W geralmente é 2 no AWS). Dessa forma haverá um retorno
+para o cliente quando 2 dos 3 eventos for verdade:
+
+* A escreveu no disco.
+* Recebeu uma resposta de B.
+* Recebeu uma resposta de C.
+
+No entanto pode ocorrer de A não conseguir escrever o dado devido a um erro. DynamoDB então,
+necessita de R copias do dado e retornar a copia mais atualizada para o cliente. Dessa forma 
+A é necessário pegar uma cópia do dado de pelo menos um de B ou C e então retornar para o Cliente.
+
+Com particionamento e replicação, o DynamoDB é,
+portanto, capaz de fornecer um serviço escalonável e confiável.
+
 ## Teoria: descrever como ocorre o processamento de consultas no BD, componente envolvidos;
 [How it works](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
 ## Teoria: descrever como ocorre a otimização de consultas no BD, componente envolvidos;
