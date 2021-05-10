@@ -92,7 +92,7 @@ portanto, capaz de fornecer um serviço escalonável e confiável.
 
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
 
-# TransactWriteItems 
+### TransactWriteItems 
 TransactWriteItems é uma operação de escrita síncrona e idempotente que agrupa até 25 ações de escrita em uma única operação de tudo-ou-nada. Essas ações podem ter como alvo até 25 itens distintos em uma ou mais tabelas DynamoDB dentro da mesma conta AWS e na mesma Região. O tamanho agregado dos itens na transação não pode exceder 4 MB. As ações são completadas atomicamente de forma que ou todas elas sejam bem sucedidas ou nenhuma delas seja bem sucedida. 
 
 Uma operação TransactWriteItems difere de uma operação BatchWriteItem em que todas as ações nela contidas devem ser completadas com sucesso, ou nenhuma alteração é feita. Com uma operação BatchWriteItem, é possível que apenas algumas das ações do lote sejam bem sucedidas enquanto as outras não.
@@ -110,7 +110,7 @@ Você pode adicionar os seguintes tipos de ações a uma transação:
 
 Uma vez concluída uma transação, as mudanças feitas dentro dessa transação são propagadas para índices secundários globais (GSIs), fluxos e backups. Como a propagação não é imediata ou instantânea, se uma tabela for restaurada do backup para um ponto médio de propagação, ela pode conter algumas, mas não todas, as mudanças feitas durante uma transação recente. 
 
-# Idempotência
+#### Idempotência
 
 Opcionalmente, você pode incluir um _token_ de acesso ao fazer uma chamada TransactWriteItems para garantir que a solicitação seja idempotente. Fazer suas transações idempotentes ajuda a evitar erros de aplicação se a mesma operação for submetida várias vezes devido a um timeout de conexão ou outro problema de conectividade. 
 
@@ -122,7 +122,7 @@ Pontos importantes sobre a idempotência:
 
 * Se você repetir uma solicitação com o mesmo _token_ de acesso dentro da janela de idempotência de 10 minutos, mas alterar algum outro parâmetro de solicitação, a DynamoDB retorna uma exceção IdempotentParameterMismatch. 
 
-# Tratamento de erros de escrita 
+#### Tratamento de erros de escrita 
 
 As transações de escrita não são bem sucedidas nas seguintes circunstâncias: 
 
@@ -140,7 +140,7 @@ As transações de escrita não são bem sucedidas nas seguintes circunstâncias
 
  
 
-# TransactGetItems API 
+### TransactGetItems API 
 
 A TransactGetItems é uma operação de leitura síncrona que agrupa até 25 ações. Essas ações podem direcionar até 25 itens distintos em uma ou mais tabelas DynamoDB dentro da mesma conta AWS e Região. O tamanho agregado dos itens na transação não pode exceder 4 MB.  
 
@@ -148,7 +148,7 @@ As ações Get são realizadas atomicamente para que ou todas elas tenham sucess
 
 * Get - Inicia uma operação GetItem para recuperar um conjunto de atributos para o item com a chave primária dada. Se nenhum item correspondente for encontrado, Get não retorna nenhum dado. 
 
-# Tratamento de erros de leitura 
+#### Tratamento de erros de leitura 
 
 As transações lidas não têm sucesso sob as seguintes circunstâncias: 
 
@@ -156,13 +156,13 @@ As transações lidas não têm sucesso sob as seguintes circunstâncias:
 * Quando não há capacidade provisionada suficiente para que a transação seja concluída. 
 * Quando há um erro do usuário, tal como um formato de dados inválido. 
 
-# Níveis de Isolamento para Transações DynamoDB 
+### Níveis de Isolamento para Transações DynamoDB 
 
 Os níveis de isolamento das operações transacionais (TransactWriteItems ou TransactGetItems) e outras operações são os seguintes. 
 
   
 
-# SERIALIZÁVEL 
+### SERIALIZÁVEL 
 
 Isolamento serializável garante que os resultados de múltiplas operações simultâneas sejam os mesmos como se nenhuma operação tivesse começado até que a anterior tivesse terminado. 
 
@@ -189,7 +189,7 @@ Por exemplo, se as solicitações GetItem para o item A e item B forem executada
 
 Se o nível de isolamento serializável for preferível para múltiplas solicitações GetItem, então use TransactGetItems. 
 
-# READ-COMMITTED 
+### READ-COMMITTED 
 
 O isolamento do _read-committed_ garante que as operações lidas sempre retornem valores comprometidos para um item. O isolamento de leitura-compromisso não impede modificações do item imediatamente após a operação lida.O nível de isolamento é _read-committed_ entre qualquer operação transacional e qualquer operação de leitura que envolva múltiplas leituras padrão (BatchGetItem, Query, ou Scan). Se uma transação escrita atualiza um item no meio de uma operação BatchGetItem, Query ou Scan, a operação lida retorna o novo valor comprometido.
 
