@@ -13,9 +13,14 @@ O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de do
 
 Na ADDB as tabelas são guardadas em partições (Partitions) que seriam a parte fisica, como o ADDB lida com isso é totalmente transparente para a nossa aplicação. A Amazon Web Service (AWS) possui SSDs fazendo a alocação e replicando o banco automaticamente entre diferentes Data Centers disponíveis na região. Lembrando que ele é alocado inicialmente no Data center mais proximo e depois replicado.
 
-Precisamos definir uma Partition Key, que seria uma Primary Key no relacional.
-Caso tenhamos o mesmo valor de Partition Key, existe a Sort Key e então it's possible for two items to have the same partition key value. However, those two items must have different sort key values.
+## Componentes
 
+No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento funciona como uma coleção de atributos. com exceção da chave primária, os elementos não possuem um conjunto de atributos fixos, ou seja, cada item de uma tabela pode possuir atributos distintos. Também é possível criar atriutos aninhados com até 32 níveis.
+
+<figure class="image">
+    <img src="imagens\componentesADDB.png" alt='Exemplo da tabela "people" com 3 elementos'>
+    <figcaption>'Exemplo da tabela "people" com 3 elementos'</figcaption>
+</figure>
 
 ## Teoria: Descrição do BD e sua estrutura (relacional, orientado a colunas, documentos, XML etc);
 
