@@ -204,7 +204,7 @@ o ADDB oferece duas formas de back-up a partir da AWS, Point-in-time backup e On
 
 ### Point-in-time backup
 
-Este modo de backup oferece a opção de restaurar o banco de dados para qualquer ponto a partir do momento em que ele é ativado (até no máximo 35 dias). O processo restaura a tabela antiga em uma nova tabela. Vale ressaltar que todas as configurações da tabela se mantarão iguais a tabela mais recente.
+Este modo de backup oferece a opção de restaurar o banco de dados para qualquer ponto a partir do momento em que ele é ativado (até no máximo 35 dias). O processo restaura a tabela antiga em uma nova tabela. Vale ressaltar que todas as configurações da tabela se manterão iguais a tabela mais recente.
 
 No exemplo abaixo ativa-se o Point-in-time backup para a tabela music:
 
