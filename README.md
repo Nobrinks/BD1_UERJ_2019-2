@@ -19,7 +19,16 @@ No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento fu
 
 <figure class="image">
     <img src="imagens\componentesADDB.png" alt='Exemplo da tabela "people" com 3 elementos'>
-    <figcaption>'Exemplo da tabela "people" com 3 elementos'</figcaption>
+    <figcaption>Exemplo da tabela "People" com 3 elementos</figcaption>
+</figure>
+
+### Chaves Primárias
+
+o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada elemento da tabela possui uma chave primária (partition key) única. É possível que uma tabela possua chave primária composta de 2 atributos (Partition Key e sort key).
+
+<figure class="image">
+    <img src="imagens\primaryKeysExample.png" alt='Exemplo da tabela "music" com chaves primárias compostas'>
+    <figcaption>Exemplo da tabela "Music" com chaves primárias compostas</figcaption>
 </figure>
 
 ## Teoria: Descrição do BD e sua estrutura (relacional, orientado a colunas, documentos, XML etc);
@@ -398,4 +407,5 @@ aws dynamodb batch-write-item --request-items file://Forum.json
 <ol>
 <li>Amazon DynamoDB. What is Amazon DynamoDB. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html. Acessado em Abril 2021</li>
 <li>Amazon DynamoDB. How it works. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html. Acessado em Abril 2021</li>
+<li>Core Components of Amazon DynamoDB. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html. Acessado em Maio 2021</li>
 </ol>
