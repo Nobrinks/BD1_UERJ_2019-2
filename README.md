@@ -199,9 +199,65 @@ O isolamento do _read-committed_ garante que as operações lidas sempre retorne
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
 [Database security](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/security.html)
 ## Teoria: descrever formas de backup e recuperação do BD, exemplificando com os comandos necessários;
+## Backup e Restauração
+o ADDB oferece duas formas de back-up a partir da AWS, Point-in-time backup e On-demand backup, ambos descritos a seguir.
+
+### Point-in-time backup
+
+Este modo de backup oferece a opção de restaurar o banco de dados para qualquer ponto a partir do momento em que ele é ativado (até no máximo 35 dias). O processo restaura a tabela antiga em uma nova tabela. Vale ressaltar que todas as configurações da tabela se mantarão iguais a tabela mais recente.
+
+No exemplo abaixo ativa-se o Point-in-time backup para a tabela music:
+
+```txt
+aws dynamodb update-continuous-backups \
+    --table-name Music \
+    --point-in-time-recovery-specification PointInTimeRecoveryEnabled=True 
+```
+Logo após recupera-se o backup mais recente disponível(usualmente retorna os ultimos 5 minutos):
+
+```txt
+aws dynamodb restore-table-to-point-in-time \
+    --source-table-name Music \
+    --target-table-name MusicMinutesAgo \
+    --use-latest-restorable-time
+```
+
+Também é possível recuperar para um horário específico:
+
+```txt
+aws dynamodb restore-table-to-point-in-time \
+    --source-table-name Music \
+    --target-table-name MusicEarliestRestorableDateTime \
+    --no-use-latest-restorable-time \
+    --restore-date-time 1519257118.0
+```
+
+### On-demand backup
+
+É possível criar backups sob demanda com comandos como:
+
+```txt
+aws dynamodb create-backup --table-name Music \
+ --backup-name MusicBackup
+```
+
+O backup on-demand é criado de maneira assíncrona, ò usuário ainda pode executar querys nas tabelas que estão sendo salvas, mas não é possível pausar ou cancelar a operação e remover a tabela.<br><br>
+Após a criação do backup é possível listar todos backups:
+```txt
+aws dynamodb list-backups
+```
+E por fim é possível restaurar a tabela Music:
+
+```txt
+aws dynamodb restore-table-from-backup \
+--target-table-name Music \
+--backup-arn arn:aws:dynamodb:us-east-1:123456789012:table/Music/backup/01489173575360-b308cd7d 
+```
+
+<!--
 Temos duas formas de fazer [backup](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/BackupRestore.html). A [on-demand](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backuprestore_HowItWorks.html) e a [point-in-time](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery_Howitworks.html).
 A on-demand tem que fazer o [backup](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup.Tutorial.html) e o [restore](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Restore.Tutorial.html).
-A point-int-time o backup é automatico e o [restore](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.Tutorial.html) pode ser por console ou AWS CLI
+A point-int-time o backup é automatico e o [restore](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.Tutorial.html) pode ser por console ou AWS CLI -->
 ## Prática: instalação do BD localmente;
 ## Prática:
 * Executar UMA inserção de dado;
