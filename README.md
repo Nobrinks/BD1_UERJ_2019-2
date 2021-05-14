@@ -314,34 +314,43 @@ para instalar o aws-cli:
 2) https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html
 
 para configurar o aws cli
-    'aws configure
-        AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
-        AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-        Default region name [None]: us-west-2
-        Default output format [None]: json'
-
+``` txt
+aws configure
+    AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+    AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    Default region name [None]: us-west-2
+    Default output format [None]: json
+```
 pra rodar o servidor do banco localmente:
-    'java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb'
+``` txt
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+```
 
 para listar as tabelas:
-    'aws dynamodb list-tables --endpoint-url http://localhost:8000'
+``` txt
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+```
 
 esse localhost tem que ter em todas as queries pq ta local
 
 o banco ja tem um default que ele usa quando voce omite o sharedDb
 
 para criar o tabela:
-    aws dynamodb create-table
-        --table-name Music
-        --attribute-definitions
-            AttributeName=Artist,AttributeType=S
-            AttributeName=SongTitle,AttributeType=S
-        --key-schema
-            AttributeName=Artist,KeyType=HASH
-            AttributeName=SongTitle,KeyType=RANGE
+``` txt
+aws dynamodb create-table
+    --table-name Music
+    --attribute-definitions
+        AttributeName=Artist,AttributeType=S
+        AttributeName=SongTitle,AttributeType=S
+    --key-schema
+        AttributeName=Artist,KeyType=HASH
+        AttributeName=SongTitle,KeyType=RANGE
+```
 
 para fazer queries
-    'aws dynamodb batch-write-item --request-items file://Forum.json'
+``` txt
+aws dynamodb batch-write-item --request-items file://Forum.json
+```
 
 ``` JSON
 {
