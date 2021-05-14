@@ -11,7 +11,7 @@
 
 O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de documentos. Cada chave só pode ter um valor.
 
-Na ADDB as tabelas são guardadas em partições (Partitions) que seriam a parte fisica, como o ADDB lida com isso é totalmente transparente para a nossa aplicação. A Amazon Web Service (AWS) possui SSDs fazendo a alocação e replicando o banco automatricamente entre diferentes Data Centers disponíveis na região. Lembrando que ele é alocado inicialmente no Data center mais proximo e depois replicado.
+Na ADDB as tabelas são guardadas em partições (Partitions) que seriam a parte fisica, como o ADDB lida com isso é totalmente transparente para a nossa aplicação. A Amazon Web Service (AWS) possui SSDs fazendo a alocação e replicando o banco automaticamente entre diferentes Data Centers disponíveis na região. Lembrando que ele é alocado inicialmente no Data center mais proximo e depois replicado.
 
 Precisamos definir uma Partition Key, que seria uma Primary Key no relacional.
 Caso tenhamos o mesmo valor de Partition Key, existe a Sort Key e então it's possible for two items to have the same partition key value. However, those two items must have different sort key values.
@@ -86,6 +86,51 @@ portanto, capaz de fornecer um serviço escalonável e confiável.
 [Index](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SQLtoNoSQL.Indexes.Creating.html)
 
 [Scans vs queries](https://medium.com/redbox-techblog/tuning-dynamodb-scans-vs-queries-110ef6c3f671)
+
+No ADDB, você pode criar uma _secondary index_, que é diferente de um banco relacional. Quando você cria a *secondary index* você deve criar uma *partition key* e uma sort key e defini-las. Após a criação, podemos fazer uma query ou um scan igual como faríamos em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando você faz uma _query_ ou um _scan_ nele mesmo.
+No Dynamo você pode usar dois tipos de indexes:
+
+* *secondary indexes* globais: a *primary key* do index deve ter dois atributos da tabela (qualquer atributo)
+
+* *secondary indexes* locais: a *partition key* do index deve ser a mesma *partition key* da tabela. Entretanto, a *sort key* pode ser qualquer atributo da tabela.
+
+Você pode adicionar uma index global em uma tabela existente, usando a ação UpdateTable e especificando GlobalSecondaryIndexUpdates
+
+``` JSON
+{
+  TableName: "Music",
+  AttributeDefinitions:[
+    {AttributeName: "Genre", AttributeType: "S"},
+    {AttributeName: "Price", AttributeType: "N"}
+  ],
+  GlobalSecondaryIndexUpdates: [
+    {
+      Create: {
+        IndexName: "GenreAndPriceIndex",
+        KeySchema: [
+          {AttributeName: "Genre", KeyType: "HASH"}, //Partition key
+          {AttributeName: "Price", KeyType: "RANGE"}, //Sort key
+        ],
+        Projection: {
+          "ProjectionType": "ALL"
+        },
+        ProvisionedThroughput: { // Only specified if using provisioned mode
+          "ReadCapacityUnits": 1,"WriteCapacityUnits": 1
+        }
+      }
+    }
+  ]
+}
+```
+
+Você deve prover os seguintes parâmetros para a `UpdateTable`
+
+* TableName - A tabela que o index vai ser associado
+
+* AttributeDefinitions - os tipos de dados para a chave 
+
+# **Falta completar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+  
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
 [Transaction](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
 
@@ -261,6 +306,69 @@ A point-int-time o backup é automatico e o [restore](https://docs.aws.amazon.co
 =======
 
 ## Prática: instalação do BD localmente;
+
+
+para instalar o aws-cli:
+
+1) Tem que instalar o java jdk e jre>8
+2) https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html
+
+para configurar o aws cli
+    'aws configure
+        AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+        AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+        Default region name [None]: us-west-2
+        Default output format [None]: json'
+
+pra rodar o servidor do banco localmente:
+    'java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb'
+
+para listar as tabelas:
+    'aws dynamodb list-tables --endpoint-url http://localhost:8000'
+
+esse localhost tem que ter em todas as queries pq ta local
+
+o banco ja tem um default que ele usa quando voce omite o sharedDb
+
+para criar o tabela:
+    aws dynamodb create-table
+        --table-name Music
+        --attribute-definitions
+            AttributeName=Artist,AttributeType=S
+            AttributeName=SongTitle,AttributeType=S
+        --key-schema
+            AttributeName=Artist,KeyType=HASH
+            AttributeName=SongTitle,KeyType=RANGE
+
+para fazer queries
+    'aws dynamodb batch-write-item --request-items file://Forum.json'
+
+``` JSON
+{
+    "Forum": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "Name": {"S":"Amazon DynamoDB"},
+                    "Category": {"S":"Amazon Web Services"},
+                    "Threads": {"N":"2"},
+                    "Messages": {"N":"4"},
+                    "Views": {"N":"1000"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Name": {"S":"Amazon S3"},
+                    "Category": {"S":"Amazon Web Services"}
+                }
+            }
+        }
+    ]
+}
+```
+
 ## Prática:
 * Executar UMA inserção de dado;
 * Executar UMA consulta aos dados do BD;
