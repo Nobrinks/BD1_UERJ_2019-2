@@ -38,7 +38,7 @@ mais partições e maquinas são utilizadas, sob demanda.
 
 -----------------
 
-A PRIMEIRA IMAGEM DO CIRCULO! 
+![Arquitetura Dynamo DB](https://github.com/Nobrinks/BD2_UERJ_2020-2/blob/trabalho2/imagens/arquitetura_dynamo.PNG)
 
 -----------------
 Quando inserimos um par de valores-chave no DynamoDB,a chave é primeiro transformada em um inteiro, I.
