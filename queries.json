@@ -1,0 +1,61 @@
+{
+    TableName: "Music",
+    KeyConditionExpression: "Artist = :a and SongTitle = :t",
+    ExpressionAttributeValues: {
+        ":a": "No One You Know",
+        ":t": "Call Me Today"
+    }
+}
+
+aws dynamodb query \
+    --table-name Thread \
+    --key-condition-expression "ForumName = :name and Subject = :sub" \
+    --expression-attribute-values  file://values.json
+
+values.json
+    {
+        ":name":{"N":"Amazon DynamoDB"},
+        ":sub":{"S":"DynamoDB Thread 1"}
+    }
+
+{
+    TableName: "GameScores",
+    AttributeDefinitions:[
+        {AttributeName: "Genre", AttributeType: "S"},
+    ],
+    GlobalSecondaryIndexUpdates: [
+        {
+            Create: {
+            IndexName: "GenreAndPriceIndex",
+            KeySchema: [
+                {AttributeName: "Genre", KeyType: "HASH"}, //Partition key
+                {AttributeName: "Price", KeyType: "RANGE"}, //Sort key
+            ],
+            Projection: {
+                "ProjectionType": ""
+            },
+            ProvisionedThroughput: { // Only specified if using provisioned mode
+                "ReadCapacityUnits": 1,"WriteCapacityUnits": 1
+            }
+            }
+        }
+    ]
+}
+
+{
+    TableName: "GameScoreIndex",
+    KeyConditionExpression: "GameTitle = :a",
+    ExpressionAttributeValues: {
+        ":a": "Meteor Blasters"
+    } alias:  "teste"
+        criacao de index
+}
+
+{
+    TableName: "teste",
+    KeyConditionExpression: "TopScoreDateTime > :myBirthday",
+    ExpressionAttributeValues: {
+        ":myBirthday": "1998"
+    }
+}
+
