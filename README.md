@@ -169,7 +169,7 @@ Você deve prover os seguintes parâmetros para a `UpdateTable`
 otimização da otimização
   https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-gsi-aggregation.html
 
-## Consultas (queries e scans)
+## Consultas 
 
 A operação de consulta no Amazon DynamoDB encontra itens com base em valores de chave primária.
 
@@ -208,9 +208,6 @@ recupera os itens de maneira organizada e então processa os itens usando as con
 ``KeyConditionExpression`` e qualquer "FilterExpression" que pode ser presente.
 Só então o resultado da Query é mandado de volta pra o cliente.
 
-Uma Query de consulta sempre retorna um conjunto de resultados. 
-Se nenhum item correspondente for encontrado, o conjunto de resultados estará vazio.
-
 Os resultados da Query são sempre classificados pelo valor da sort key.
 Se o tipo de dados da sort key for numero, os resultados serão retornados em ordem numérica.
 Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética).Por padrão, a ordem de classificação é crescente.
@@ -247,7 +244,7 @@ Portanto, uma consulta consome a mesma quantidade de capacidade de leitura,
 independentemente da presença de uma expressão de filtro.
 
 Uma ``FilterExpression`` não pode conter chave primaria ou atributos de sort key. 
-Você precisa especificar esses atributos na ``KeyConditionExpression``, não na ``FilterExpression``.
+Você precisa especificar esses atributos na ``KeyConditionExpression``, não na expressão de filtro.
 
 A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpression``.
 ## Transações
