@@ -31,71 +31,46 @@ o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada el
     <figcaption>Exemplo da tabela "Music" com chaves primárias compostas</figcaption>
 </figure>
 
-## Teoria: Descrição do BD e sua estrutura (relacional, orientado a colunas, documentos, XML etc);
+## Arquitetura
 
-Amazon DynamoDB is a key-value and document database that delivers single-digit-millisecond performance at any scale. It's a fully managed, multi-region, multi-master, durable database with built-in security, backup and restore, and in-memory caching for internet-scale applications
+O ADDB armazena todos os seus dados em "blocos" de memória chamados de "partitions" ou particões. O endereçamento desses dados funciona como um hash-map, onde cada elemento terá uma partition alvo e essas partitions são distribuídas e replicadas em diversos servidores da AWS da região.
 
-## Teoria: Arquitetura (Desenho da arquitetura dos componentes do BD);
-[Arquitetura da vida](https://medium.com/swlh/architecture-of-amazons-dynamodb-and-why-its-performance-is-so-high-31d4274c3129#:~:text=DynamoDB%20uses%20a%20cluster%20of,the%20DynamoDB%20has%203%20machines.)
+### Particão
 
-DynamoDB é um banco de dados NoSQL fornecido pela Amazon Web Service (AWS).Visto de longe, 
-DynamoDB é basicamente um armazenamento de chaves-valores. Pode ser entendido como
-um "hash-map" ajudado por alguns armazenamentos resistentes. 
-A duas operações mais importantes são: Get e Put.
-
-O que diferencia o DynamoDB é sua extrema rapidez em *particionamentos*.
-Para conseguir um escalonamento horizontal, ele atribui dados para diferentes
-partições que são hospedados em maquinas distintas, e quanto mais dados 
-mais partições e maquinas são utilizadas, sob demanda.
-
-
------------------
+O AWS aloca máquinas o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
 
 <figure class="image">
-    <img src="imagens\arquitetura_dynamo.PNG" alt='Arquitetura Dynamo DB'>
-    <figcaption>Arquitetura Dynamo DB</figcaption>
+    <img src="imagens\arquitetura_dynamo.PNG" alt='Busca da máquina-alvo'>
+    <figcaption>Busca da máquina-alvo</figcaption>
 </figure>
 
------------------
-Quando inserimos um par de valores-chave no DynamoDB,a chave é primeiro transformada em um inteiro, I.
-O par de valores-chave é então armazenado na máquina que encontraremos 
-primeiro se começarmos de I e andarmos no sentido horário ao redor do anel . 
-Portanto, as chaves que são hash para (1000, 2⁶⁴-1] e [0, 100] 
-são armazenadas na máquina A. Portanto, a máquina B armazena as chaves
-cujos valores de hash estão entre 100 e 2000. O resto é armazenado na máquina C.
+No exemplo da imagem acima, se a função hash retornar 100000, o dado será armazenado na máquina A.
 
+Caso uma máquina fique sobrecarregada de dados o AWS aloca máquinas adicionais para o banco. A nova máquina armazenará todos os dados do seu novo intervalo.
 
-Quando se recebe muitos dados, a ponto de sobrecarregar uma maquina pode-se
-adicionar outra maquina que irá pegar parte dos dados da maquina sobrecarregada.
-Um Token então é gerado de maneira diferente para a nova maquina para demonstrar que
-contém os parte dos dados da máquina sobrecarregada.
+<figure class="image">
+    <img src="imagens\arquitetura_dynamo_nova_maquina.PNG" alt='adicao de uma nova maquina'>
+    <figcaption>Adição da máquina "D" ao cluster</figcaption>
+</figure>
 
-Se um conjunto de Tokens recebe muitos dados pode-se progressivamente criar mais máquinas,
-e fazer o dado ficar distribuido entre mais máquinas do mesmo conjunto de tokens.
-Se muitos dados começarem a serem deletados, e algumas maquinas começarem a ficar liberadas,
-pode-se juntar várias maquinas para comportar todos os dados dessas maquinas com poucos dados
+No exemplo acima todos os dados entre os endereços 10000 e 15000 seão transferidos para a máquina D. Caso uma máquina fique subutilizada, o banco pode remover uma máquina e transferir seus dados para a próxima máquina.
 
-DynamoDB também replica os dados N vezes pelas outras maquinas.
-(Assumiremos N = 3 pois é o mais comum no AWS)
+### Replicação
 
-Quando se recebe um request de salvar dados, ele passa ele para as duas próximas máquinas.
-Logo o dado estará armazenado na máquina A, B e C. Então A só manda uma resposta pro cliente de
-salvo, quando ele receber uma resposta de B e C comprovando que neles foram salvos também.
+Para evitar perda de dados caso haja um problema em alguma máquina, quando ocorre uma requisição de inserção no banco, a AWS replica a inserção da máquina-alvo nas N-1 próximas máquinas.
 
-Porém não necessita de resposta de todas as máquinas que foram feitas as replicas, ele só precisa
-da resposta de W maquinas garantir que foi salvo.(W geralmente é 2 no AWS). Dessa forma haverá um retorno
-para o cliente quando 2 dos 3 eventos for verdade:
+<figure class="image">
+    <img src="imagens\arquitetura_dynamo_replicacao.PNG" alt='Replicação da requisição nas N-1 próximas máquinas (N=3)'>
+    <figcaption>Replicação da requisição nas N-1 próximas máquinas (N=3)</figcaption>
+</figure>
 
-* A escreveu no disco.
-* Recebeu uma resposta de B.
-* Recebeu uma resposta de C.
+Para evitar perda de desempenho na operação de escrita, o banco enviará a resposta de conclusão da escrita caso uma quantidade W de máquinas termine a operação.
 
-No entanto pode ocorrer de A não conseguir escrever o dado devido a um erro. DynamoDB então,
-necessita de R copias do dado e retornar a copia mais atualizada para o cliente. Dessa forma 
-A é necessário pegar uma cópia do dado de pelo menos um de B ou C e então retornar para o Cliente.
+Um problema desse método é que uma requisição de leitura pode tentar recuperar dados de uma máquina que não tenha completado o processo de escrita, retornando dados inválidos ou desatualizados. Para resolver este problema o banco lê R cópias do dado entre as máquinas do cluster, retornando o valor mais recente.
 
-Com particionamento e replicação, o DynamoDB é,
-portanto, capaz de fornecer um serviço escalonável e confiável.
+Para garantir que a operação seja um sucesso, o valor de R+W deve ser superior ao valor de N, dessa maneira garante-se que o dado mais recente será recuperado.
+
+-------------------------------------------
 
 ## Teoria: descrever como ocorre o processamento de consultas no BD, componente envolvidos;
 [How it works](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
