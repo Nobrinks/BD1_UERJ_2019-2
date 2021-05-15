@@ -169,6 +169,87 @@ Você deve prover os seguintes parâmetros para a `UpdateTable`
 otimização da otimização
   https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-gsi-aggregation.html
 
+## Consultas (queries e scans)
+
+A operação de consulta no Amazon DynamoDB encontra itens com base em valores de chave primária.
+
+Você deve fornecer o nome do atributo da chave primaria e um único valor para esse atributo.
+A Query retorna todos os itens com esse valor de chave primaria. 
+Opcionalmente, você pode fornecer um atributo de sort key(chave de ordenação) e 
+usar um operador de comparação para refinar os resultados da pesquisa.
+
+### KeyConditionExpression:
+
+```txt
+aws dynamodb query \
+    --table-name Music \
+    --key-condition-expression "Artist = :name" \
+    --expression-attribute-values  file://values.json
+```
+
+Os argumentos para --expression-attribute-values estao armazenados no arquivo values.json abaixo.
+
+```JSON
+{
+   ":name":{"S":"Acme Band"}
+}
+```
+Para especificar o critério de busca, é usado a ``KeyConditionExpression``.
+Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex: "ForumName = :name")
+
+**Deve-se especificar o nome e o valor da chave primária como uma condição de igualdade.**
+
+Pode-se usar qualquer atributo numa key condition expression, desde que o primeiro caracter seja
+[a-z] ou [A-Z] and the second character (if present) is [a-z], [A-Z], or 0-9.
+
+Para items com uma chave primaria entregue,  DynamoDB armazena esses itens juntos,
+em ordem de classificação por valor de sort key. Numa operação de Query, DynamoDB
+recupera os itens de maneira organizada e então processa os itens usando as condições do
+``KeyConditionExpression`` e qualquer "FilterExpression" que pode ser presente.
+Só então o resultado da Query é mandado de volta pra o cliente.
+
+Uma Query de consulta sempre retorna um conjunto de resultados. 
+Se nenhum item correspondente for encontrado, o conjunto de resultados estará vazio.
+
+Os resultados da Query são sempre classificados pelo valor da sort key.
+Se o tipo de dados da sort key for numero, os resultados serão retornados em ordem numérica.
+Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética).Por padrão, a ordem de classificação é crescente.
+
+Uma única operação na Query pode recuperar no máximo 1 MB de dados. 
+Esse limite se aplica antes que qualquer "FilterExpression" seja aplicado aos resultados.
+
+### FilterExpression para a Query:
+
+```txt
+aws dynamodb query \
+    --table-name Thread \
+    --key-condition-expression "ForumName = :fn and Subject = :sub" \
+    --filter-expression "#v >= :num" \
+    --expression-attribute-names '{"#v": "Views"}' \
+    --expression-attribute-values file://values.json
+```
+Os argumentos para --expression-attribute-values estao armazenados no arquivo values.json abaixo.
+
+```JSON
+{
+    ":fn":{"S":"Amazon DynamoDB"},
+    ":sub":{"S":"DynamoDB Thread 1"},
+    ":num":{"N":"3"}
+}
+```
+Se você precisar refinar ainda mais os resultados da Query,
+poderá fornecer, opcionalmente, uma ``FilterExpression``.Ela determina quais itens nos resultados
+da consulta devem ser retornados para o usuário. 
+Todos os outros resultados são descartados.( Ex: "#v >= :num" )
+
+Ela é aplicada depois que a consulta é terminada, mas antes dos resultados serem retornados.
+Portanto, uma consulta consome a mesma quantidade de capacidade de leitura, 
+independentemente da presença de uma expressão de filtro.
+
+Uma ``FilterExpression`` não pode conter chave primaria ou atributos de sort key. 
+Você precisa especificar esses atributos na ``KeyConditionExpression``, não na ``FilterExpression``.
+
+A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpression``.
 ## Transações
 
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
