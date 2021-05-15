@@ -35,7 +35,7 @@ o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada el
 
 O ADDB armazena todos os seus dados em "blocos" de memória chamados de "partitions" ou particões. O endereçamento desses dados funciona como um hash-map, onde cada elemento terá uma partition alvo e essas partitions são distribuídas e replicadas em diversos servidores da AWS da região.
 
-### Particão
+### Partição
 
 O AWS aloca máquinas o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
 
@@ -145,7 +145,9 @@ Você deve prover os seguintes parâmetros para a `UpdateTable`
 
   * ``ProvisionedThroughput`` (para tabelas definidas)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
 
- 
+otimização da otimização
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-gsi-aggregation.html
+
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
 
 [Transaction](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
