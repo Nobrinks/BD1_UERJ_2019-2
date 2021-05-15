@@ -1,0 +1,19 @@
+{
+    TableName: "Music",
+    KeyConditionExpression: "Artist = :a and SongTitle = :t",
+    ExpressionAttributeValues: {
+        ":a": "No One You Know",
+        ":t": "Call Me Today"
+    }
+}
+
+aws dynamodb query \
+    --table-name Thread \
+    --key-condition-expression "ForumName = :name and Subject = :sub" \
+    --expression-attribute-values  file://values.json
+
+values.json
+    {
+        ":name":{"N":"Amazon DynamoDB"},
+        ":sub":{"S":"DynamoDB Thread 1"}
+    }

@@ -97,8 +97,8 @@ Suas diferenças:
 | Restrições de tamanho por valores de *Partition Key* | Não há restrições | Para cada valor de *partition key*, o tamanho total de todos os itens indexados deve ser de <10 GB.
 | Operações Online de índices | Podem ser criados ao mesmo tempo da criação de uma tabela. Pode ser adicionado um novo índice a uma tabela existente ou excluir um índice existente. | São criados ao mesmo tempo em que se cria uma tabela. Não é possível ser adicionado a uma tabela existente nem excluir índices secundários locais existentes.
 | *Queries* e *Partitions* | Permite a consulta da tabela inteira, em todas as partições. | Permite consultar uma única partição, conforme especificado pelo valor da *partition key* na consulta.
-| *Provisioned Throughput Consumption* | Tem suas próprias configurações de *provisioned throughput* para operações de leitura e gravação. Consultas ou verificações em um índice secundário global consomem unidades de capacidade do índice, e não da tabela base. O mesmo vale para atualizações de índice secundário global devido a gravações de tabela. | 
-| Projected Attributes |  | 
+| *Provisioned Throughput Consumption* | Tem suas próprias configurações de *provisioned throughput* para operações de leitura e gravação. *Queries* ou *scans* consomem unidades de capacidade do índice, e não da tabela base. O mesmo vale para atualizações de índice secundário global devido a gravações de tabelas. | *Queries* ou *scans* consomem unidades de capacidade de leitura da tabela base. Quando você escreve em uma tabela, seus índices secundários locais também são atualizados. Essas atualizações consomem unidades de capacidade de gravação da tabela base.
+| Projected Attributes | Após ser definido o *projection*, não pode-se alterar os atributos que serão projetados na *query/scan* do índice. | Pode ser definido atributos a posteriori da criação do índice
 
 Pode-se adicionar uma index global em uma tabela existente, usando a ação UpdateTable e especificando GlobalSecondaryIndexUpdates
 
@@ -141,9 +141,9 @@ Você deve prover os seguintes parâmetros para a `UpdateTable`
 
   * ``KeySchema`` - os atributos que são usados para a chave primária do índice.
 
-  * ``Projection`` - atributos da tabela que são copiados para o índice. Neste caso, ALL significa que todos os atributos são copiados. Importante, no caso de um índice global, após ser definido o *projection*, não podemos alterar os atributos que serão projetados quando fizermos a *query/scan* do índice. Em um índice local, sim.
+  * ``Projection`` - atributos da tabela que são copiados para o índice. Neste caso, ALL significa que todos os atributos são copiados. Pode ser INCLUDE e definir certos atributos ou KEYS_ONLY para ser apenas chaves.
 
-  * ``ProvisionedThroughput`` (for provisioned tables)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
+  * ``ProvisionedThroughput`` (para tabelas definidas)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
 
  
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
