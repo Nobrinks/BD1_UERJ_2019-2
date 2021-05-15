@@ -249,10 +249,6 @@ A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpr
 
 ## Transações
 
-Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
-
-## Transações
-
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. Ambas com um limite de 25 itens distintos sendo requisitados ou alterados. 
 Caso seja preciso que a transação seja feita ainda que algumas requisições falhem, pode-se usar chamadas de funções depreciadas que a Amazon não recomenda o uso, o BatchWriteItem e o BatchGetItem, onde a primeira tem um limite de 100 alterações e o segundo de 25. 
 Caso seja necessário verificar se a requisição é idempotente. Precisa-se ter um *client token* que funciona por 10 minutos, assim, pode-se verificar se o item dentro da transação de fato foi alterado. Apenas o TransactWriteItems aceita essa funcionalidade. Se qualquer parâmetro for diferente, o dynamoDB retornará um erro.
