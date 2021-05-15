@@ -258,19 +258,13 @@ O isolamento do _read-committed_ garante que as operações lidas sempre retorne
 
 _Optimistic locking_ é uma estratégia que assegura que o item do lado do cliente que se está atualizando (ou excluindo) seja o mesmo que o item na _Amazon DynamoDB_. Se usar esta estratégia, as gravações de seu banco de dados serão protegidas de serem sobrescritas pelas gravações de outros, e vice versa
 
-Com o _Optimistic locking_, cada item tem um atributo que age como um número de versão. Se recuperar um item de uma tabela, a aplicação grava o número de versão daquele item. Pode-se atualizar o item, mas apenas se o número de versão no lado do servidor não tiver sido alterado. Se houver uma incompatibilidade de versão, significa que alguém modificou o item antes de você. A tentativa de atualização falha, porque se tem uma versão desatualizada do item. Caso isto aconteça, simlesmente tente de novo recuperando o item e, em seguida, tentando atualizá-lo.
+Com o _Optimistic locking_, cada item tem um atributo que funciona como um número de versão. Se retornar um item de uma tabela, a aplicação grava o número de versão daquele item. Pode-se atualizar o item, mas apenas se o número de versão no lado do servidor não tiver sido alterado. Se houver uma incompatibilidade de versão, significa que alguém modificou este item ateriormente. A tentativa de atualização falha, porque se tem uma versão desatualizada do item. Caso isto aconteça, simplesmente tente de novo recuperando o item e, em seguida, tentando atualizá-lo.
 
 _Optimistic locking_ tem o seguinte impacto nestes métodos do ```DynamoDBWrapper```:
 
-* ```save``` — Para um novo item, o ```DynamoDBWrapper``` atribui um número de versão inicial 1. Caso recupere um item, atualize um ou mais de suas propriedade e tente salvar as alterações, a operação de salvar tem sucesso apenas se o número de versão no lado do cliente e no lado do servidor forem correspondentes.
+* ```save```, ```put```, ```update```  — Para um novo item, o ```DynamoDBWrapper``` atribui um número de versão inicial 1. Caso recupere um item, atualize um ou mais de suas propriedade e tente salvar as alterações, a operação ```save```, ```put``` e ```update``` terão sucesso apenas se o número de versão no lado do cliente e no lado do servidor forem correspondentes.
 
 * ```delete``` — o método ```delete``` necessita de um objeto como parametro e o ```DynamoDBMapper``` realiza a verificação da versão antes de remover o item. A verificação da versão pode ser desabilitada se ```DynamoDBMapperConfig.SaveBehavior.CLOBBER``` for especificado na requisição.
-A implementação interna do _optimistic locking_ dentro do ```DynamoDBMapper``` usa atualização condicional e remoção condicional fornecido pelo _DynamoDB_.
-
-* ```transactionWrite``` —
-  * ```Put```
-  * ```Update```
-  * ```Delete```
 
 ### Distributed Locking
 
@@ -286,7 +280,7 @@ A implementação de um _distributed locking_ é difícil de se conseguir porque
 
 * _Stale locks_
 
-Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqueio (_holder lock_), o processo que está impedindo os demais processos de executarem. Enquanto processos concorrentes tentam ser os próximos detentores do bloqueio. Uma desvantagem desta abordagem é que um processo poderia estar sem sorte enquanto outros seriam muito sortudos. Um processo que não pudesse tomar o bloqueio aguarda por um certo tempo, para apenas descobrir ao final da espera que outro processo tomará o seu lugar na fila novamente, sofrendo de starvation.
+Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqueio (_holder lock_), o processo que está impedindo os demais processos de executarem. Enquanto processos concorrentes tentam ser os próximos detentores do bloqueio. Uma desvantagem desta abordagem é que um processo poderia estar sem sorte enquanto outros seriam muito sortudos. O primeiro processo que não puder se tornar o _holder lock_, aguarda por um certo tempo, e após este tempo ele percebe que outro processo vai tomar a sua frente, impedindo esse processo inicial. Isto pode continuar indefinidamente, levando o processo a sofrer de starvation.
 
 [Concurrency using optimistic locking](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.OptimisticLocking.html)
 [Read Consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
