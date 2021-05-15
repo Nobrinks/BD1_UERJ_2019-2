@@ -297,6 +297,22 @@ Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqu
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
 [Database security](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/security.html)
 
+## Proteção de Dados em DynamoDB
+
+A AmazonDB fornece uma infarestrutura de armazenagem resiliente projetada para armazenamento de dados de missão crítica e primários. Os dados são armazenados de maneira redundante, em vários dispositivos de diversas instalações em uma região do _Amazon DynamoDB_.
+
+O _DynamoDB_ protege os dados de usuários armazenados em repouso e também os que estão em trânsito entre os clientes e o DynamoDB, e entre o _DynamoDB_ e outros recursos da AWS na mesma região da AWS.
+
+### Criptografia do DynamoDB em Repouso
+
+A criptografia do _DynamoDB_ em repouso fornece uma melhor segurança ao critografar os dados em repouso usando as chaves de criptografia armazenadas no _AWS Key Management Service (AWS KMS)_. Isto ajuda a reduzir a carga operacioanl e a complexidade involvida em proteger dados sensíveis. Também fornece uma camada adicional de proteção de dados ao assegurar os dados em uma tabela criptografada.
+Ao criar uma nova tabela, pode-se escolher uma das seguintes chaves mestras do cliente (CMK - customer master keys) para criptografar a tabela:
+
+* CMK de posse da AWS - tipo de criptografia padrão
+* CMK gerenciada pela AWS - a chave é armazenada na conta do cliente e gerecniada pela AWS KMS
+* CMK gerenciada pelo cliente - a chave é armazenada na conta e criada, detetida e gerenciada pelo cliente.
+
+Ao acessar ua tabela criptografada, o _DynamoDB_ descriptografa os dadosda tabela transparentemente.
 <br>
 ===================================================
 ## Backup e Restauração
