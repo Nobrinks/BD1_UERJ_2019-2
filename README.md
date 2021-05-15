@@ -17,20 +17,23 @@ O ADDB oferece um servviço de banco de dados através da Amazon Web Service (AW
 ## Componentes
 
 No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento funciona como uma coleção de atributos. com exceção da chave primária, os elementos não possuem um conjunto de atributos fixos, ou seja, cada item de uma tabela pode possuir atributos distintos. Também é possível criar atriutos aninhados com até 32 níveis.
-
+</br></br>
 <figure class="image">
     <img src="imagens\componentesADDB.png" alt='Exemplo da tabela "people" com 3 elementos'>
     <figcaption>Exemplo da tabela "People" com 3 elementos</figcaption>
 </figure>
+</br></br>
 
 ### Chaves Primárias
 
 o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada elemento da tabela possui uma chave primária (partition key) única. É possível que uma tabela possua chave primária composta de 2 atributos (Partition Key e sort key).
 
+</br></br>
 <figure class="image">
     <img src="imagens\primaryKeysExample.png" alt='Exemplo da tabela "music" com chaves primárias compostas'>
     <figcaption>Exemplo da tabela "Music" com chaves primárias compostas</figcaption>
 </figure>
+</br></br>
 
 ## Arquitetura
 
@@ -40,19 +43,23 @@ O ADDB armazena todos os seus dados em "blocos" de memória chamados de "partiti
 
 O AWS aloca máquinas o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
 
+</br></br>
 <figure class="image">
     <img src="imagens\arquitetura_dynamo.PNG" alt='Busca da máquina-alvo'>
     <figcaption>Busca da máquina-alvo</figcaption>
 </figure>
+</br></br>
 
 No exemplo da imagem acima, se a função hash retornar 100000, o dado será armazenado na máquina A.
 
 Caso uma máquina fique sobrecarregada de dados o AWS aloca máquinas adicionais para o banco. A nova máquina armazenará todos os dados do seu novo intervalo.
 
+</br></br>
 <figure class="image">
     <img src="imagens\arquitetura_dynamo_nova_maquina.PNG" alt='adicao de uma nova maquina'>
     <figcaption>Adição da máquina "D" ao cluster</figcaption>
 </figure>
+</br></br>
 
 No exemplo acima todos os dados entre os endereços 10000 e 15000 seão transferidos para a máquina D. Caso uma máquina fique subutilizada, o banco pode remover uma máquina e transferir seus dados para a próxima máquina.
 
@@ -60,10 +67,12 @@ No exemplo acima todos os dados entre os endereços 10000 e 15000 seão transfer
 
 Para evitar perda de dados caso haja um problema em alguma máquina, quando ocorre uma requisição de inserção no banco, a AWS replica a inserção da máquina-alvo nas N-1 próximas máquinas.
 
+</br></br>
 <figure class="image">
     <img src="imagens\arquitetura_dynamo_replicacao.PNG" alt='Replicação da requisição nas N-1 próximas máquinas (N=3)'>
     <figcaption>Replicação da requisição nas N-1 próximas máquinas (N=3)</figcaption>
 </figure>
+</br></br>
 
 Para evitar perda de desempenho na operação de escrita, o banco enviará a resposta de conclusão da escrita caso uma quantidade W de máquinas termine a operação.
 
@@ -75,17 +84,21 @@ Para garantir que a operação seja um sucesso, o valor de R+W deve ser superior
 
 Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada ``partition key``, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
 
+</br></br>
 <figure class="image">
     <img src="imagens\DataDistributionPK.png" alt='Exemplo de alocação de um elemento em uma partition'>
     <figcaption>Exemplo de alocação de um elemento em uma partição</figcaption>
 </figure>
+</br></br>
 
 Se o elemento possuir uma chave secundária, ou ``Sort Key``, serão alocados para a mesma partição todos os elementos com a mesma ``partition key`` e estes estarão ordenados pela sua ``sort key``.
 
+</br></br>
 <figure class="image">
     <img src="imagens\DataDistributionSK.png" alt='Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key'>
     <figcaption>Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key</figcaption>
 </figure>
+</br></br>
 
 No ADDB, pode-se criar uma _secondary index_, que é diferente do conceito de index de um banco relacional. Quando você cria a *secondary index* deve-se criar uma *partition key* e uma sort key e defini-las. Após a criação, pode-se fazer uma query ou um scan igual como seria feito em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando se faz uma _query_ ou um _scan_ nele mesmo.
 Quando é gerado uma *secondary index*, uma outra tabela é criada com as chaves definidas, além da *primary key* da tabela original, ou seja, no final, mesmo tendo definido apenas duas chaves, a nova tabela terá 3.
@@ -157,8 +170,6 @@ otimização da otimização
   https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-gsi-aggregation.html
 
 ## Transações
-
-[Transaction](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
 
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
 
@@ -262,7 +273,7 @@ Se o nível de isolamento serializável for preferível para múltiplas solicita
 
 O isolamento do _read-committed_ garante que as operações lidas sempre retornem valores comprometidos para um item. O isolamento de leitura-compromisso não impede modificações do item imediatamente após a operação lida.O nível de isolamento é _read-committed_ entre qualquer operação transacional e qualquer operação de leitura que envolva múltiplas leituras padrão (BatchGetItem, Query, ou Scan). Se uma transação escrita atualiza um item no meio de uma operação BatchGetItem, Query ou Scan, a operação lida retorna o novo valor comprometido.
 
-## Teoria: descrever como ocorre o controle de concorrência no BD;
+## Controle de Concorrência
 
 ### Optimistic locking
 
@@ -292,8 +303,7 @@ A implementação de um _distributed locking_ é difícil de se conseguir porque
 
 Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqueio (_holder lock_), o processo que está impedindo os demais processos de executarem. Enquanto processos concorrentes tentam ser os próximos detentores do bloqueio. Uma desvantagem desta abordagem é que um processo poderia estar sem sorte enquanto outros seriam muito sortudos. O primeiro processo que não puder se tornar o _holder lock_, aguarda por um certo tempo, e após este tempo ele percebe que outro processo vai tomar a sua frente, impedindo esse processo inicial. Isto pode continuar indefinidamente, levando o processo a sofrer de starvation.
 
-[Concurrency using optimistic locking](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.OptimisticLocking.html)
-[Read Consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
+
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
 [Database security](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/security.html)
 
@@ -314,7 +324,9 @@ Ao criar uma nova tabela, pode-se escolher uma das seguintes chaves mestras do c
 
 Ao acessar ua tabela criptografada, o _DynamoDB_ descriptografa os dadosda tabela transparentemente.
 <br>
-===================================================
+
+---------------------------------------------
+
 ## Backup e Restauração
 o ADDB oferece duas formas de back-up a partir da AWS, Point-in-time backup e On-demand backup, ambos descritos a seguir.
 
@@ -459,5 +471,7 @@ aws dynamodb batch-write-item --request-items file://Forum.json
 <li>Amazon DynamoDB. Relational (SQL) or NoSQL? Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SQLtoNoSQL.WhyDynamoDB.html. Acesso em Maio 2021</li>
 <li>Amazon DynamoDB. Partitions and Data Distribution. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html. Acesso em Maio 2021</li>
 <li>Amazon DynamoDB. Working with Queries in DynamoDB. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html. Acesso em Maio 2021</li>
+<li>Amazon DynamoDB. Optimistic Locking with Version Number. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.OptimisticLocking.html. Acesso em Maio 2021</li>
+<li>Amazon DynamoDB. Read Consistency. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html. Acesso em Maio 2021</li>
 <li>Medium. The Architecture of Amazon’s DynamoDB and Why Its Performance Is So High. Disponível em: https://medium.com/swlh/architecture-of-amazons-dynamodb-and-why-its-performance-is-so-high-31d4274c3129#:~:text=DynamoDB. Acesso em Abril 2021</li>
 </ol>
