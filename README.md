@@ -11,12 +11,13 @@
 
 O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de documentos. Se comparado com um banco sql convencional, o ADDB não possui um esquema bem definido, cada tabela possui uma chave primária única, mas não existe nenhuma restrição para todos os outro atributos do elemento, mesmo entre elementos de uma mesma tabela.
 
-O ADDB oferece um servviço de banco de dados através da Amazon Web Service (AWS) focado em aplicações on-line, otimizando latência de conexão e oferecendo um serviço altamente escalonável através de clusters dinâmicos de máquinas responsáveis pelo armazenamento de dados.
+O ADDB oferece um serviço de banco de dados através da Amazon Web Service (AWS) focado em aplicações on-line, otimizando latência de conexão e oferecendo um serviço altamente escalonável através de clusters dinâmicos de máquinas responsáveis pelo armazenamento de dados.
 
 
 ## Componentes
 
-No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento funciona como uma coleção de atributos. com exceção da chave primária, os elementos não possuem um conjunto de atributos fixos, ou seja, cada item de uma tabela pode possuir atributos distintos. Também é possível criar atriutos aninhados com até 32 níveis.
+No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento funciona como uma coleção de atributos. com exceção da chave primária, os elementos não possuem um conjunto de atributos fixos, ou seja, cada item de uma tabela pode possuir atributos distintos. Também é possível criar atributos aninhados com até 32 níveis.
+
 </br></br>
 <figure class="image">
     <img src="imagens\componentesADDB.png" alt='Exemplo da tabela "people" com 3 elementos'>
@@ -26,7 +27,7 @@ No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento fu
 
 ### Chaves Primárias
 
-o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada elemento da tabela possui uma chave primária (partition key) única. É possível que uma tabela possua chave primária composta de 2 atributos (Partition Key e sort key).
+o ADDB possui dois tipos de chaves primárias, ``Partition Key`` e ``Sort Key``. Cada elemento da tabela possui uma chave primária (``Partition key``) única. É possível que uma tabela possua chave primária composta de 2 atributos (``Partition Key`` e ``Sort key``).
 
 </br></br>
 <figure class="image">
@@ -37,11 +38,11 @@ o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada el
 
 ## Arquitetura
 
-O ADDB armazena todos os seus dados em "blocos" de memória chamados de "partitions" ou particões. O endereçamento desses dados funciona como um hash-map, onde cada elemento terá uma partition alvo e essas partitions são distribuídas e replicadas em diversos servidores da AWS da região.
+O ADDB armazena todos os seus dados em blocos de memória chamados de "partitions" ou particões. O endereçamento desses dados funciona como um hash-map, onde cada elemento terá uma partição alvo e essas partição são distribuídas e replicadas em diversos servidores da AWS da região.
 
 ### Partição
 
-O AWS aloca máquinas o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
+O AWS aloca máquinas para o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
 
 </br></br>
 <figure class="image">
@@ -82,7 +83,7 @@ Para garantir que a operação seja um sucesso, o valor de R+W deve ser superior
 
 ## Otimização (GLI e SLI)
 
-Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada ``partition key``, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
+Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada ``Partition key``, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
 
 </br></br>
 <figure class="image">
@@ -91,7 +92,7 @@ Como explicado anteriormente, todo elemento de uma tabela possui uma chave prim�
 </figure>
 </br></br>
 
-Se o elemento possuir uma chave secundária, ou ``Sort Key``, serão alocados para a mesma partição todos os elementos com a mesma ``partition key`` e estes estarão ordenados pela sua ``sort key``.
+Se o elemento possuir uma chave secundária, ou ``Sort Key``, serão alocados para a mesma partição todos os elementos com a mesma ``Partition key`` e estes estarão ordenados pela sua ``Sort key``.
 
 </br></br>
 <figure class="image">
@@ -173,9 +174,9 @@ otimização da otimização
 
 A operação de consulta no Amazon DynamoDB encontra itens com base em valores de chave primária.
 
-Você deve fornecer o nome do atributo da chave primaria e um único valor para esse atributo.
-A Query retorna todos os itens com esse valor de chave primaria. 
-Opcionalmente, você pode fornecer um atributo de sort key(chave de ordenação) e 
+Deve-se fornecer o nome do atributo da chave primária e um único valor para esse atributo.
+A Query retorna todos os itens com esse valor de chave primária. 
+Opcionalmente, você pode fornecer um atributo de chave de ordenação (``Sort key``) e 
 usar um operador de comparação para refinar os resultados da pesquisa.
 
 ### KeyConditionExpression:
@@ -195,25 +196,20 @@ Os argumentos para --expression-attribute-values estao armazenados no arquivo va
 }
 ```
 Para especificar o critério de busca, é usado a ``KeyConditionExpression``.
-Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex: "ForumName = :name")
+Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex: ``ForumName = :name``)
 
 **Deve-se especificar o nome e o valor da chave primária como uma condição de igualdade.**
 
-Pode-se usar qualquer atributo numa KeyConditionExpression, desde que o primeiro caracter seja
-[a-z] ou [A-Z].
+Pode-se usar qualquer atributo numa ``KeyConditionExpression``, desde que o primeiro caractere seja [a-z] ou [A-Z].
 
-Para items com uma chave primaria entregue,  DynamoDB armazena esses itens juntos,
-em ordem de classificação por valor de sort key. Numa operação de Query, DynamoDB
-recupera os itens de maneira organizada e então processa os itens usando as condições do
-``KeyConditionExpression`` e qualquer "FilterExpression" que pode ser presente.
-Só então o resultado da Query é mandado de volta pra o cliente.
+Como explicado anteriormente, para elementos com uma mesma chave primária, O ADDB os guarda na mesma partição em ordem de classificação por valor de sort key. Em uma operação de Query, o ADDB recupera os itens de maneira organizada e então processa os itens usando as condições do ``KeyConditionExpression`` e ``FilterExpression`` que podem estar presentes. Só então o resultado da consulta é retornado para o cliente.
 
-Os resultados da Query são sempre classificados pelo valor da sort key.
-Se o tipo de dados da sort key for numero, os resultados serão retornados em ordem numérica.
-Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética).Por padrão, a ordem de classificação é crescente.
+Os resultados da consulta são sempre classificados pelo valor da ``Sort key`` quando presente.
+Se o tipo de dados da ``Sort key`` for numérico, os resultados serão retornados em ordem numérica.
+Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética). Por padrão, a ordem de classificação é crescente.
 
-Uma única operação na Query pode recuperar no máximo 1 MB de dados. 
-Esse limite se aplica antes que qualquer "FilterExpression" seja aplicado aos resultados.
+Uma única operação de consulta pode recuperar no máximo 1 MB de dados. 
+Esse limite se aplica antes que qualquer ``FilterExpression`` seja aplicado aos resultados.
 
 ### FilterExpression para a Query:
 
@@ -234,19 +230,20 @@ Os argumentos para --expression-attribute-values estao armazenados no arquivo va
     ":num":{"N":"3"}
 }
 ```
-Se você precisar refinar ainda mais os resultados da Query,
-poderá fornecer, opcionalmente, uma ``FilterExpression``.Ela determina quais itens nos resultados
+Se for necessário refinar ainda mais os resultados da Query,
+poderá ser fornecido, opcionalmente, uma ``FilterExpression``. Ela determina quais itens dos resultados
 da consulta devem ser retornados para o usuário. 
-Todos os outros resultados são descartados.( Ex: "#v >= :num" )
+Todos os outros resultados são descartados.( Ex: ``#v >= :num`` )
 
-Ela é aplicada depois que a consulta é terminada, mas antes dos resultados serem retornados.
+A ``FilterExpression`` é aplicada depois que a consulta é terminada, mas antes dos resultados serem retornados.
 Portanto, uma consulta consome a mesma quantidade de capacidade de leitura, 
-independentemente da presença de uma expressão de filtro.
+independentemente da presença de uma ``FilterExpression``.
 
-Uma ``FilterExpression`` não pode conter chave primaria ou atributos de sort key. 
+Uma ``FilterExpression`` não pode conter chave primária ou atributos de sort key. 
 Você precisa especificar esses atributos na ``KeyConditionExpression``, não na expressão de filtro.
 
 A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpression``.
+
 ## Transações
 
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
