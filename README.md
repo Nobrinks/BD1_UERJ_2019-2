@@ -49,9 +49,11 @@ partições que são hospedados em maquinas distintas, e quanto mais dados
 mais partições e maquinas são utilizadas, sob demanda.
 
 
+-----------------
+
 <figure class="image">
-    <img src="imagens/arquitetura_dynamo.PNG" alt='Exemplo da tabela "people" com 3 elementos'>
-    <figcaption>Exemplo da tabela "People" com 3 elementos</figcaption>
+    <img src="imagens\arquitetura_dynamo.PNG" alt='Arquitetura Dynamo DB'>
+    <figcaption>Arquitetura Dynamo DB</figcaption>
 </figure>
 
 Quando inserimos um par de valores-chave no DynamoDB,a chave é primeiro transformada em um inteiro, I.
@@ -276,6 +278,11 @@ Se o nível de isolamento serializável for preferível para múltiplas solicita
 O isolamento do _read-committed_ garante que as operações lidas sempre retornem valores comprometidos para um item. O isolamento de leitura-compromisso não impede modificações do item imediatamente após a operação lida.O nível de isolamento é _read-committed_ entre qualquer operação transacional e qualquer operação de leitura que envolva múltiplas leituras padrão (BatchGetItem, Query, ou Scan). Se uma transação escrita atualiza um item no meio de uma operação BatchGetItem, Query ou Scan, a operação lida retorna o novo valor comprometido.
 
 ## Teoria: descrever como ocorre o controle de concorrência no BD;
+
+_Optimistic locking_ é uma estratégia que assegura que o item do lado do cliente que se está atualizando (ou excluindo) seja o mesmo que o item na _Amazon DynamoDB_. Se usar esta estratégia, as gravações de seu banco de dados serão protegidas de serem sobrescritas pelas gravações de outros, e vice versa
+
+Com o _Optimistic locking_, cada item tem um atributo que age como um número de versão. Se recuperar um item de uma tabela, a aplicação grava o número de versão daquele item. Pode-se atualizar o item, mas apenas se o número de versão no lado do servidor não tiver sido alterado. Se houver uma incompatibilidade de versão, significa que alguém modificou o item antes de você. A tentativa de atualização falha, porque se tem uma versão desatualizada do item. Caso isto aconteça, simlesmente tente de novo recuperando o item e, em seguida, tentando atualizá-lo.
+
 [Concurrency using optimistic locking](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.OptimisticLocking.html)
 [Read Consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
