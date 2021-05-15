@@ -80,7 +80,7 @@ Um problema desse método é que uma requisição de leitura pode tentar recuper
 
 Para garantir que a operação seja um sucesso, o valor de R+W deve ser superior ao valor de N, dessa maneira garante-se que o dado mais recente será recuperado.
 
-## Otimização (GLI e SLI)
+## Otimização
 
 Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada ``partition key``, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
 
@@ -100,7 +100,8 @@ Se o elemento possuir uma chave secundária, ou ``Sort Key``, serão alocados pa
 </figure>
 </br></br>
 
-No ADDB, pode-se criar uma _secondary index_, que é diferente do conceito de index de um banco relacional. Quando você cria a *secondary index* deve-se criar uma *partition key* e uma sort key e defini-las. Após a criação, pode-se fazer uma query ou um scan igual como seria feito em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando se faz uma _query_ ou um _scan_ nele mesmo.
+
+Porém, caso você queira ordenar de maneira diferente e restringir os atributos projetados, pode-se criar uma _secondary index_, que é diferente do conceito de index de um banco relacional. Quando você cria a *secondary index* deve-se criar uma *partition key* (caso seja uma global, que será explicado a seguir) e uma sort key e defini-las. Após a criação, pode-se fazer uma query ou um scan igual como seria feito em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando se faz uma _query_ ou um _scan_ nele mesmo.
 Quando é gerado uma *secondary index*, uma outra tabela é criada com as chaves definidas, além da *primary key* da tabela original, ou seja, no final, mesmo tendo definido apenas duas chaves, a nova tabela terá 3.
 
 No Dynamo pode-se usar dois tipos de indexes:
@@ -121,7 +122,25 @@ Suas diferenças:
 | *Provisioned Throughput Consumption* | Tem suas próprias configurações de *provisioned throughput* para operações de leitura e gravação. *Queries* ou *scans* consomem unidades de capacidade do índice, e não da tabela base. O mesmo vale para atualizações de índice secundário global devido a gravações de tabelas. | *Queries* ou *scans* consomem unidades de capacidade de leitura da tabela base. Quando você escreve em uma tabela, seus índices secundários locais também são atualizados. Essas atualizações consomem unidades de capacidade de gravação da tabela base.
 | Projected Attributes | Após ser definido o *projection*, não pode-se alterar os atributos que serão projetados na *query/scan* do índice. | Pode ser definido atributos a posteriori da criação do índice
 
-Pode-se adicionar uma index global em uma tabela existente, usando a ação UpdateTable e especificando GlobalSecondaryIndexUpdates
+Você deve prover os seguintes parâmetros para a `UpdateTable`
+
+* ``TableName`` - A tabela que o index vai ser associado
+
+* ``AttributeDefinitions`` - os tipos de dados para a *key schema*
+
+* ``GlobalSecondaryIndexUpdates`` - detalhes sobre o índice que você deseja criar:
+
+  * `IndexName` - um nome para o índice.
+
+  * ``KeySchema`` - os atributos que são usados para a chave primária do índice.
+
+  * ``Projection`` - atributos da tabela que são copiados para o índice. Neste caso, ALL significa que todos os atributos são copiados. Pode ser INCLUDE e definir certos atributos ou KEYS_ONLY para ser apenas chaves.
+
+  * ``ProvisionedThroughput`` (para tabelas definidas)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
+
+### Exemplo de criação de um index
+
+Pode-se adicionar uma index global em uma tabela existente, usando a ação UpdateTable e especificando GlobalSecondaryIndexUpdates:
 
 ``` JSON
 {
@@ -148,26 +167,10 @@ Pode-se adicionar uma index global em uma tabela existente, usando a ação Upda
     }
   ]
 }
+
+
+Retirado da documentação do DynamoDB 
 ```
-
-Você deve prover os seguintes parâmetros para a `UpdateTable`
-
-* ``TableName`` - A tabela que o index vai ser associado
-
-* ``AttributeDefinitions`` - os tipos de dados para a *key schema*
-
-* ``GlobalSecondaryIndexUpdates`` - detalhes sobre o índice que você deseja criar:
-
-  * `IndexName` - um nome para o índice.
-
-  * ``KeySchema`` - os atributos que são usados para a chave primária do índice.
-
-  * ``Projection`` - atributos da tabela que são copiados para o índice. Neste caso, ALL significa que todos os atributos são copiados. Pode ser INCLUDE e definir certos atributos ou KEYS_ONLY para ser apenas chaves.
-
-  * ``ProvisionedThroughput`` (para tabelas definidas)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
-
-otimização da otimização
-  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-gsi-aggregation.html
 
 ## Consultas 
 
@@ -247,109 +250,62 @@ Uma ``FilterExpression`` não pode conter chave primaria ou atributos de sort ke
 Você precisa especificar esses atributos na ``KeyConditionExpression``, não na expressão de filtro.
 
 A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpression``.
+
 ## Transações
 
-Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
+Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. Ambas com um limite de 25 itens distintos sendo requisitados ou alterados. 
+Caso seja preciso que a transação seja feita ainda que algumas requisições falhem, pode-se usar chamadas de funções depreciadas que a Amazon não recomenda o uso, o BatchWriteItem e o BatchGetItem, onde a primeira tem um limite de 100 alterações e o segundo de 25. 
+Caso seja necessário verificar se a requisição é idempotente. Precisa-se ter um *client token* que funciona por 10 minutos, assim, pode-se verificar se o item dentro da transação de fato foi alterado. Apenas o TransactWriteItems aceita essa funcionalidade. Se qualquer parâmetro for diferente, o dynamoDB retornará um erro.
 
-### TransactWriteItems 
-TransactWriteItems é uma operação de escrita síncrona e idempotente que agrupa até 25 ações de escrita em uma única operação de tudo-ou-nada. Essas ações podem ter como alvo até 25 itens distintos em uma ou mais tabelas DynamoDB dentro da mesma conta AWS e na mesma Região. O tamanho agregado dos itens na transação não pode exceder 4 MB. As ações são completadas atomicamente de forma que ou todas elas sejam bem sucedidas ou nenhuma delas seja bem sucedida. 
+### TransactWriteItems
 
-Uma operação TransactWriteItems difere de uma operação BatchWriteItem em que todas as ações nela contidas devem ser completadas com sucesso, ou nenhuma alteração é feita. Com uma operação BatchWriteItem, é possível que apenas algumas das ações do lote sejam bem sucedidas enquanto as outras não.
-Não é possível visar o mesmo item com múltiplas operações dentro da mesma transação. Por exemplo, você não pode realizar um ConditionCheck e também uma ação de atualização sobre o mesmo item na mesma transação. 
+Você pode adicionar os seguintes tipos de ações a uma transação:
 
-Você pode adicionar os seguintes tipos de ações a uma transação: 
+* ``Put`` - Inicia uma operação PutItem para criar um novo item ou substituir um item antigo por um novo. Aceita ``ConditionExpression``
 
-* Put - Inicia uma operação PutItem para criar um novo item ou substituir um item antigo por um novo item, condicionalmente ou sem especificar qualquer condição. 
+* ``Update`` - Inicia uma operação UpdateItem para editar os atributos de um item existente ou adicionar um novo item à tabela se ele ainda não existir. Aceita ``ConditionExpression``.
 
-* Update - Inicia uma operação UpdateItem para editar os atributos de um item existente ou adicionar um novo item à tabela se ele ainda não existir. Use esta ação para adicionar, excluir ou atualizar atributos em um item existente condicionalmente ou sem uma condição. 
+* ``Delete`` - Inicia uma operação DeleteItem para excluir um único item em uma tabela identificada por sua chave primária.
 
-* Delete - Inicia uma operação DeleteItem para excluir um único item em uma tabela identificada por sua chave primária. 
+* ``ConditionCheck`` - Verifica se um item existe ou verifica a condição de atributos específicos do item.
 
-* ConditionCheck - Verifica se um item existe ou verifica a condição de atributos específicos do item. 
+Uma vez concluída uma transação, as mudanças feitas dentro dessa transação são propagadas para *secondary index* global (GSIs), fluxos e backups. Como a propagação não é imediata ou instantânea, se uma tabela for restaurada do backup para um ponto médio de propagação, ela pode conter algumas, mas não todas, as mudanças feitas durante uma transação recente.
 
-Uma vez concluída uma transação, as mudanças feitas dentro dessa transação são propagadas para índices secundários globais (GSIs), fluxos e backups. Como a propagação não é imediata ou instantânea, se uma tabela for restaurada do backup para um ponto médio de propagação, ela pode conter algumas, mas não todas, as mudanças feitas durante uma transação recente. 
+#### Tratamento de erros de escrita
 
-#### Idempotência
+As transações de escrita não são bem sucedidas nas seguintes circunstâncias:
 
-Opcionalmente, você pode incluir um _token_ de acesso ao fazer uma chamada TransactWriteItems para garantir que a solicitação seja idempotente. Fazer suas transações idempotentes ajuda a evitar erros de aplicação se a mesma operação for submetida várias vezes devido a um timeout de conexão ou outro problema de conectividade. 
-
-Se a chamada TransactWriteItems original foi bem sucedida, as chamadas TransactWriteItems subsequentes com o mesmo _token_ de acesso retornam com sucesso sem fazer nenhuma alteração. Se o parâmetro ReturnConsumedCapacity for definido, a chamada TransactWriteItems inicial retorna o número de unidades de capacidade de gravação consumidas na realização das mudanças. Chamadas TransactWriteItems subsequentes com o mesmo _token_ de acesso retornam o número de unidades de capacidade de leitura consumidas na leitura do item. 
-
-Pontos importantes sobre a idempotência: 
-
-* Uma ficha de cliente é válida por 10 minutos após o término da solicitação que a utiliza. Após 10 minutos, qualquer pedido que utilize o mesmo _token_ de acesso é tratado como um novo pedido. Não se deve reutilizar o mesmo _token_ de acesso para a mesma solicitação após 10 minutos. 
-
-* Se você repetir uma solicitação com o mesmo _token_ de acesso dentro da janela de idempotência de 10 minutos, mas alterar algum outro parâmetro de solicitação, a DynamoDB retorna uma exceção IdempotentParameterMismatch. 
-
-#### Tratamento de erros de escrita 
-
-As transações de escrita não são bem sucedidas nas seguintes circunstâncias: 
-
-* Quando uma condição em uma das expressões de condição não é satisfeita. 
+* Quando uma condição em uma das expressões de condição não é satisfeita.
 
 * Quando um erro de validação de transação ocorre porque mais de uma ação na mesma TransactWriteItems operação visa o mesmo item.  
 
 * Quando uma solicitação TransactWriteItems entra em conflito com uma operação TransactWriteItems em andamento em um ou mais itens da solicitação TransactWriteItems. Neste caso, a solicitação falha com uma TransactionCanceledException.  
 
-* Quando não há capacidade provisionada suficiente para que a transação seja concluída. 
+* Quando não há capacidade provisionada suficiente para que a transação seja concluída.
 
-* Quando um item se torna muito grande (maior que 400 KB), ou um índice secundário local (LSI) torna-se muito grande, ou um erro de validação similar ocorre devido a mudanças feitas pela transação. 
+* Quando um item se torna muito grande (maior que 400 KB), ou um índice secundário local (LSI) torna-se muito grande, ou um erro de validação similar ocorre devido a mudanças feitas pela transação.
 
-* Quando há um erro do usuário, tal como um formato de dados inválido. 
+* Quando há um erro do usuário, tal como um formato de dados inválido.
 
- 
+### TransactGetItems
 
-### TransactGetItems API 
+* Get - Inicia uma operação GetItem para recuperar um conjunto de atributos para o item com a chave primária dada. Se nenhum item correspondente for encontrado, Get não retorna nenhum dado.
 
-A TransactGetItems é uma operação de leitura síncrona que agrupa até 25 ações. Essas ações podem direcionar até 25 itens distintos em uma ou mais tabelas DynamoDB dentro da mesma conta AWS e Região. O tamanho agregado dos itens na transação não pode exceder 4 MB.  
-
-As ações Get são realizadas atomicamente para que ou todas elas tenham sucesso ou todas elas falhem: 
-
-* Get - Inicia uma operação GetItem para recuperar um conjunto de atributos para o item com a chave primária dada. Se nenhum item correspondente for encontrado, Get não retorna nenhum dado. 
-
-#### Tratamento de erros de leitura 
+#### Tratamento de erros de leitura
 
 As transações lidas não têm sucesso sob as seguintes circunstâncias: 
 
-* Quando uma solicitação TransactGetItems entra em conflito com uma operação TransactWriteItems em andamento em um ou mais itens da solicitação TransactGetItems. Neste caso, a solicitação falha com uma TransactionCanceledException. 
-* Quando não há capacidade provisionada suficiente para que a transação seja concluída. 
-* Quando há um erro do usuário, tal como um formato de dados inválido. 
+* Quando uma solicitação TransactGetItems entra em conflito com uma operação TransactWriteItems em andamento em um ou mais itens da solicitação TransactGetItems. Neste caso, a solicitação falha com uma TransactionCanceledException.
 
-### Níveis de Isolamento para Transações DynamoDB 
+* Quando não há capacidade provisionada suficiente para que a transação seja concluída.
 
-Os níveis de isolamento das operações transacionais (TransactWriteItems ou TransactGetItems) e outras operações são os seguintes. 
+* Quando há um erro do usuário, tal como um formato de dados inválido.
 
+### Níveis de Isolamento para Transações DynamoDB
 
-### Serializável
+* Serializável
 
-Isolamento serializável garante que os resultados de múltiplas operações simultâneas sejam os mesmos como se nenhuma operação tivesse começado até que a anterior tivesse terminado. 
-
-Existe um isolamento serializável entre os seguintes tipos de operação: 
-
-* Entre qualquer operação transacional e qualquer operação de escrita padrão (PutItem, UpdateItem, ou DeleteItem). 
-
-* Entre qualquer operação transacional e qualquer operação de leitura padrão (GetItem). 
-
-* Entre uma operação de TransactWriteItems e uma operação de TransactGetItems. 
-
-Embora haja um isolamento serializável entre as operações transacionais, e cada padrão individual escreve em uma operação BatchWriteItem, não há isolamento serializável entre a transação e a operação BatchWriteItem como uma unidade. 
-
-Da mesma forma, o nível de isolamento entre uma operação transacional e uma GetItems individual em uma operação BatchGetItem é serializável. Mas o nível de isolamento entre a transação e a operação BatchGetItem como uma unidade é _read-committed_. 
-
-Uma única solicitação GetItem é serializável com relação a uma solicitação TransactWriteItems em uma das duas formas, antes ou depois da solicitação TransactWriteItems. Múltiplas solicitações GetItem, contra chaves em uma solicitação TransactWriteItems concorrente, podem ser executadas em qualquer ordem e, portanto, os resultados são readcomissionados. 
-
-Por exemplo, se as solicitações GetItem para o item A e item B forem executadas simultaneamente com uma solicitação TransactWriteItems que modifica tanto o item A quanto o item B, há quatro possibilidades:  
-
-* Ambas as solicitações GetItem são executadas antes da solicitação TransactWriteItems. 
-* Ambas as solicitações GetItem são executadas após a solicitação TransactWriteItems. 
-* A solicitação GetItem para o item A é executada antes da solicitação TransactWriteItems. Para o item B, a solicitação GetItem é executada após a solicitação TransactWriteItems. 
-* A solicitação GetItem para o item B é executada antes da solicitação TransactWriteItems. Para o item A, a solicitação GetItem é executada após a TransactWriteItems. 
-
-Se o nível de isolamento serializável for preferível para múltiplas solicitações GetItem, então use TransactGetItems. 
-
-### Read-Commited 
-
-O isolamento do _read-committed_ garante que as operações lidas sempre retornem valores comprometidos para um item. O isolamento de leitura-compromisso não impede modificações do item imediatamente após a operação lida.O nível de isolamento é _read-committed_ entre qualquer operação transacional e qualquer operação de leitura que envolva múltiplas leituras padrão (BatchGetItem, Query, ou Scan). Se uma transação escrita atualiza um item no meio de uma operação BatchGetItem, Query ou Scan, a operação lida retorna o novo valor comprometido.
+* Read-Commited
 
 ## Controle de Concorrência
 
@@ -552,4 +508,5 @@ aws dynamodb batch-write-item --request-items file://Forum.json
 <li>Amazon DynamoDB. Optimistic Locking with Version Number. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBMapper.OptimisticLocking.html. Acesso em Maio 2021</li>
 <li>Amazon DynamoDB. Read Consistency. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html. Acesso em Maio 2021</li>
 <li>Medium. The Architecture of Amazon’s DynamoDB and Why Its Performance Is So High. Disponível em: https://medium.com/swlh/architecture-of-amazons-dynamodb-and-why-its-performance-is-so-high-31d4274c3129#:~:text=DynamoDB. Acesso em Abril 2021</li>
+<li>Amazon DynamoDB Transactions: How It Works. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html</li>
 </ol>

@@ -23,7 +23,7 @@ values.json
     AttributeDefinitions:[
         {AttributeName: "Genre", AttributeType: "S"},
     ],
-    GlobalSecondaryIndexUpdates: [
+    GlobalSecondaryIndexUpdates: [k
         {
             Create: {
             IndexName: "GenreAndPriceIndex",
@@ -47,8 +47,7 @@ values.json
     KeyConditionExpression: "GameTitle = :a",
     ExpressionAttributeValues: {
         ":a": "Meteor Blasters"
-    } alias:  "teste"
-        criacao de index
+    }
 }
 
 {
