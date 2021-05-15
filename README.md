@@ -199,8 +199,8 @@ Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex
 
 **Deve-se especificar o nome e o valor da chave primária como uma condição de igualdade.**
 
-Pode-se usar qualquer atributo numa key condition expression, desde que o primeiro caracter seja
-[a-z] ou [A-Z] and the second character (if present) is [a-z], [A-Z], or 0-9.
+Pode-se usar qualquer atributo numa KeyConditionExpression, desde que o primeiro caracter seja
+[a-z] ou [A-Z].
 
 Para items com uma chave primaria entregue,  DynamoDB armazena esses itens juntos,
 em ordem de classificação por valor de sort key. Numa operação de Query, DynamoDB
