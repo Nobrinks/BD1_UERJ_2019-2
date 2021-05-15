@@ -9,9 +9,10 @@
   
 ## Introdução
 
-O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de documentos. Cada chave só pode ter um valor.
+O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de documentos. Se comparado com um banco sql convencional, o ADDB não possui um esquema bem definido, cada tabela possui uma chave primária única, mas não existe nenhuma restrição para todos os outro atributos do elemento, mesmo entre elementos de uma mesma tabela.
 
-Na ADDB as tabelas são guardadas em partições (Partitions) que seriam a parte fisica, como o ADDB lida com isso é totalmente transparente para a nossa aplicação. A Amazon Web Service (AWS) possui SSDs fazendo a alocação e replicando o banco automaticamente entre diferentes Data Centers disponíveis na região. Lembrando que ele é alocado inicialmente no Data center mais proximo e depois replicado.
+O ADDB oferece um servviço de banco de dados através da Amazon Web Service (AWS) focado em aplicações on-line, otimizando latência de conexão e oferecendo um serviço altamente escalonável através de clusters dinâmicos de máquinas responsáveis pelo armazenamento de dados.
+
 
 ## Componentes
 
