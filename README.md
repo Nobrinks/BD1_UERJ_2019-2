@@ -70,14 +70,21 @@ Um problema desse método é que uma requisição de leitura pode tentar recuper
 
 Para garantir que a operação seja um sucesso, o valor de R+W deve ser superior ao valor de N, dessa maneira garante-se que o dado mais recente será recuperado.
 
--------------------------------------------
+## Otimização (GLI e SLI)
 
-## Teoria: descrever como ocorre o processamento de consultas no BD, componente envolvidos;
-[How it works](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Query.html)
-## Teoria: descrever como ocorre a otimização de consultas no BD, componente envolvidos;
-[Index](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SQLtoNoSQL.Indexes.Creating.html)
+Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada ``partition key``, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
 
-[Scans vs queries](https://medium.com/redbox-techblog/tuning-dynamodb-scans-vs-queries-110ef6c3f671)
+<figure class="image">
+    <img src="imagens\DataDistributionPK.png" alt='Exemplo de alocação de um elemento em uma partition'>
+    <figcaption>Exemplo de alocação de um elemento em uma partição</figcaption>
+</figure>
+
+Se o elemento possuir uma chave secundária, ou ``Sort Key``, serão alocados para a mesma partição todos os elementos com a mesma ``partition key`` e estes estarão ordenados pela sua ``sort key``.
+
+<figure class="image">
+    <img src="imagens\DataDistributionSK.png" alt='Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key'>
+    <figcaption>Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key</figcaption>
+</figure>
 
 No ADDB, pode-se criar uma _secondary index_, que é diferente do conceito de index de um banco relacional. Quando você cria a *secondary index* deve-se criar uma *partition key* e uma sort key e defini-las. Após a criação, pode-se fazer uma query ou um scan igual como seria feito em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando se faz uma _query_ ou um _scan_ nele mesmo.
 Quando é gerado uma *secondary index*, uma outra tabela é criada com as chaves definidas, além da *primary key* da tabela original, ou seja, no final, mesmo tendo definido apenas duas chaves, a nova tabela terá 3.
@@ -148,7 +155,7 @@ Você deve prover os seguintes parâmetros para a `UpdateTable`
 otimização da otimização
   https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-gsi-aggregation.html
 
-## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
+## Transações
 
 [Transaction](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
 
@@ -223,7 +230,7 @@ As transações lidas não têm sucesso sob as seguintes circunstâncias:
 Os níveis de isolamento das operações transacionais (TransactWriteItems ou TransactGetItems) e outras operações são os seguintes. 
 
 
-### SERIALIZÁVEL 
+### Serializável
 
 Isolamento serializável garante que os resultados de múltiplas operações simultâneas sejam os mesmos como se nenhuma operação tivesse começado até que a anterior tivesse terminado. 
 
@@ -250,7 +257,7 @@ Por exemplo, se as solicitações GetItem para o item A e item B forem executada
 
 Se o nível de isolamento serializável for preferível para múltiplas solicitações GetItem, então use TransactGetItems. 
 
-### READ-COMMITTED 
+### Read-Commited 
 
 O isolamento do _read-committed_ garante que as operações lidas sempre retornem valores comprometidos para um item. O isolamento de leitura-compromisso não impede modificações do item imediatamente após a operação lida.O nível de isolamento é _read-committed_ entre qualquer operação transacional e qualquer operação de leitura que envolva múltiplas leituras padrão (BatchGetItem, Query, ou Scan). Se uma transação escrita atualiza um item no meio de uma operação BatchGetItem, Query ou Scan, a operação lida retorna o novo valor comprometido.
 
@@ -288,7 +295,9 @@ Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqu
 [Read Consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
 [Database security](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/security.html)
-## Teoria: descrever formas de backup e recuperação do BD, exemplificando com os comandos necessários;
+
+<br>
+===================================================
 ## Backup e Restauração
 o ADDB oferece duas formas de back-up a partir da AWS, Point-in-time backup e On-demand backup, ambos descritos a seguir.
 
@@ -423,16 +432,6 @@ aws dynamodb batch-write-item --request-items file://Forum.json
     ]
 }
 ```
-
-## Prática:
-* Executar UMA inserção de dado;
-* Executar UMA consulta aos dados do BD;
-* Como gerar plano de execução no BD, caso tenha a possibilidade;
-* Exemplo de 1 cenário de otimização de consulta;
-* Exemplo de criação de um usuário;
-* Exemplo de uma concessão de privilégio com execução de um comando que demonstre esse privilégio com sucesso;
-* Exemplo de uma revogação de privilégio com tentativa de execução de comando proibido e gerando erro;
-## Exemplos retirados da própria documentação do banco - NÃO ESQUECER DE COLOCAR AS REFERÊNCIAS! CUIDADO COM PLÁGIOS!
 
 ## Referências
 
