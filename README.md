@@ -49,14 +49,14 @@ partições que são hospedados em maquinas distintas, e quanto mais dados
 mais partições e maquinas são utilizadas, sob demanda.
 
 
------------------
+<figure class="image">
+    <img src="imagens/arquitetura_dynamo.PNG" alt='Exemplo da tabela "people" com 3 elementos'>
+    <figcaption>Exemplo da tabela "People" com 3 elementos</figcaption>
+</figure>
 
-![Arquitetura Dynamo DB](https://github.com/Nobrinks/BD2_UERJ_2020-2/blob/trabalho2/imagens/arquitetura_dynamo.PNG)
-
------------------
 Quando inserimos um par de valores-chave no DynamoDB,a chave é primeiro transformada em um inteiro, I.
 O par de valores-chave é então armazenado na máquina que encontraremos 
-primeiro se começarmos de I e andarmos no sentido horário ao redor do anel . 
+primeiro se começarmos de I e andarmos no sentido horário ao redor do anel.
 Portanto, as chaves que são hash para (1000, 2⁶⁴-1] e [0, 100] 
 são armazenadas na máquina A. Portanto, a máquina B armazena as chaves
 cujos valores de hash estão entre 100 e 2000. O resto é armazenado na máquina C.
@@ -101,14 +101,28 @@ portanto, capaz de fornecer um serviço escalonável e confiável.
 
 [Scans vs queries](https://medium.com/redbox-techblog/tuning-dynamodb-scans-vs-queries-110ef6c3f671)
 
-No ADDB, você pode criar uma _secondary index_, que é diferente de um banco relacional. Quando você cria a *secondary index* você deve criar uma *partition key* e uma sort key e defini-las. Após a criação, podemos fazer uma query ou um scan igual como faríamos em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando você faz uma _query_ ou um _scan_ nele mesmo.
-No Dynamo você pode usar dois tipos de indexes:
+No ADDB, pode-se criar uma _secondary index_, que é diferente do conceito de index de um banco relacional. Quando você cria a *secondary index* deve-se criar uma *partition key* e uma sort key e defini-las. Após a criação, pode-se fazer uma query ou um scan igual como seria feito em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando se faz uma _query_ ou um _scan_ nele mesmo.
+Quando é gerado uma *secondary index*, uma outra tabela é criada com as chaves definidas, além da *primary key* da tabela original, ou seja, no final, mesmo tendo definido apenas duas chaves, a nova tabela terá 3.
 
-* *secondary indexes* globais: a *primary key* do index deve ter dois atributos da tabela (qualquer atributo)
+No Dynamo pode-se usar dois tipos de indexes:
 
-* *secondary indexes* locais: a *partition key* do index deve ser a mesma *partition key* da tabela. Entretanto, a *sort key* pode ser qualquer atributo da tabela.
+* *secondary indexes* globais: a *primary key* do index deve ter dois atributos da tabela (qualquer atributo). Para projetar posteriormente, apenas será mostrado os atributos definidos no parâmetro ``Projection`` no momento da criação do índex. Esse parâmetro será explicado.
 
-Você pode adicionar uma index global em uma tabela existente, usando a ação UpdateTable e especificando GlobalSecondaryIndexUpdates
+* *secondary indexes* locais: a *partition key* do index deve ser a mesma *partition key* da tabela. Entretanto, a *sort key* pode ser qualquer atributo da tabela. Além disso, podemos projetar qualquer atributo a posteriori da criação do índex, mesmo que não tenha sido definido no ``Projection``.
+
+Suas diferenças:
+
+| Características  | Global Secondary Index | Local Secondary Index |
+| ----------- | ----------- | ----------- |
+| *Key Schema* | A chave primária pode ser simples (*partition key*) ou composta (*partition* e *sort key*). | A chave primária deve ser composta (*partition key* e *sort key*).
+| *Key Attributes* | A *partition* e a *sort key* (se definida) podem ser qualquer atributo da tabela base do tipo String, Número ou Binário. | A *partition key* do índice é a mesma da tabela base. A *sort key* pode ser qualquer atributo da tabela base do tipo String, Número ou Binário.
+| Restrições de tamanho por valores de *Partition Key* | Não há restrições | Para cada valor de *partition key*, o tamanho total de todos os itens indexados deve ser de <10 GB.
+| Operações Online de índices | Podem ser criados ao mesmo tempo da criação de uma tabela. Pode ser adicionado um novo índice a uma tabela existente ou excluir um índice existente. | São criados ao mesmo tempo em que se cria uma tabela. Não é possível ser adicionado a uma tabela existente nem excluir índices secundários locais existentes.
+| *Queries* e *Partitions* | Permite a consulta da tabela inteira, em todas as partições. | Permite consultar uma única partição, conforme especificado pelo valor da *partition key* na consulta.
+| *Provisioned Throughput Consumption* | Tem suas próprias configurações de *provisioned throughput* para operações de leitura e gravação. Consultas ou verificações em um índice secundário global consomem unidades de capacidade do índice, e não da tabela base. O mesmo vale para atualizações de índice secundário global devido a gravações de tabela. | 
+| Projected Attributes |  | 
+
+Pode-se adicionar uma index global em uma tabela existente, usando a ação UpdateTable e especificando GlobalSecondaryIndexUpdates
 
 ``` JSON
 {
@@ -139,13 +153,23 @@ Você pode adicionar uma index global em uma tabela existente, usando a ação U
 
 Você deve prover os seguintes parâmetros para a `UpdateTable`
 
-* TableName - A tabela que o index vai ser associado
+* ``TableName`` - A tabela que o index vai ser associado
 
-* AttributeDefinitions - os tipos de dados para a chave 
+* ``AttributeDefinitions`` - os tipos de dados para a *key schema*
 
-# **Falta completar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
-  
+* ``GlobalSecondaryIndexUpdates`` - detalhes sobre o índice que você deseja criar:
+
+  * `IndexName` - um nome para o índice.
+
+  * ``KeySchema`` - os atributos que são usados para a chave primária do índice.
+
+  * ``Projection`` - atributos da tabela que são copiados para o índice. Neste caso, ALL significa que todos os atributos são copiados. Importante, no caso de um índice global, após ser definido o *projection*, não podemos alterar os atributos que serão projetados quando fizermos a *query/scan* do índice. Em um índice local, sim.
+
+  * ``ProvisionedThroughput`` (for provisioned tables)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
+
+ 
 ## Teoria: descrever como ocorre o controle de transações no BD, confirmação, rollback, tipos de bloqueios, níveis de isolamento;
+
 [Transaction](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
 
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. As seções seguintes descrevem operações da API, gerenciamento de capacidade e outros detalhes sobre o uso de operações transacionais no DynamoDB. 
