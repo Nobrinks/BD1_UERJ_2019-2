@@ -11,7 +11,7 @@
 
 O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de documentos. Se comparado com um banco sql convencional, o ADDB não possui um esquema bem definido, cada tabela possui uma chave primária única, mas não existe nenhuma restrição para todos os outro atributos do elemento, mesmo entre elementos de uma mesma tabela.
 
-O ADDB oferece um servviço de banco de dados através da Amazon Web Service (AWS) focado em aplicações on-line, otimizando latência de conexão e oferecendo um serviço altamente escalonável através de clusters dinâmicos de máquinas responsáveis pelo armazenamento de dados.
+O ADDB oferece um serviço de banco de dados através da Amazon Web Service (AWS) focado em aplicações on-line, otimizando latência de conexão e oferecendo um serviço altamente escalonável através de clusters dinâmicos de máquinas responsáveis pelo armazenamento de dados.
 
 ## Arquitetura
 
@@ -194,7 +194,7 @@ Os argumentos para --expression-attribute-values estão armazenados no arquivo v
 }
 ```
 Para especificar o critério de busca, é usado a ``KeyConditionExpression``.
-Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex: "ForumName = :name")
+Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex: ``ForumName = :name``)
 
 **Deve-se especificar o nome e o valor da chave primária como uma condição de igualdade.**
 
@@ -210,8 +210,8 @@ Os resultados da Query são sempre classificados pelo valor da sort key.
 Se o tipo de dados da sort key for número, os resultados serão retornados em ordem numérica.
 Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética). Por padrão, a ordem de classificação é crescente.
 
-Uma única operação na Query pode recuperar no máximo 1 MB de dados. 
-Esse limite se aplica antes que qualquer "FilterExpression" seja aplicado aos resultados.
+Uma única operação de consulta pode recuperar no máximo 1 MB de dados. 
+Esse limite se aplica antes que qualquer ``FilterExpression`` seja aplicado aos resultados.
 
 ### FilterExpression para a Query:
 
