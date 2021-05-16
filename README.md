@@ -13,35 +13,32 @@ O Amazon DynamoDB (ADDB) é um banco de dados de Chave-Valor (Key-Value) e de do
 
 O ADDB oferece um servviço de banco de dados através da Amazon Web Service (AWS) focado em aplicações on-line, otimizando latência de conexão e oferecendo um serviço altamente escalonável através de clusters dinâmicos de máquinas responsáveis pelo armazenamento de dados.
 
+## Arquitetura
 
-## Componentes
+### Componentes
 
 No ADDB cada tabela funciona como uma coleção de elementos, e cada elemento funciona como uma coleção de atributos. com exceção da chave primária, os elementos não possuem um conjunto de atributos fixos, ou seja, cada item de uma tabela pode possuir atributos distintos. Também é possível criar atriutos aninhados com até 32 níveis.
-</br></br>
 <figure class="image">
     <img src="imagens\componentesADDB.png" alt='Exemplo da tabela "people" com 3 elementos'>
     <figcaption>Exemplo da tabela "People" com 3 elementos</figcaption>
 </figure>
-</br></br>
+</br>
 
-### Chaves Primárias
+#### Chaves Primárias
 
-o ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada elemento da tabela possui uma chave primária (partition key) única. É possível que uma tabela possua chave primária composta de 2 atributos (Partition Key e sort key).
-
-</br></br>
+O ADDB possui dois tipos de chaves primárias, Partition Key e Sort Key. Cada elemento da tabela possui uma chave primária (partition key) única. É possível que uma tabela possua chave primária composta de 2 atributos (Partition Key e sort key).
+</br>
 <figure class="image">
     <img src="imagens\primaryKeysExample.png" alt='Exemplo da tabela "music" com chaves primárias compostas'>
     <figcaption>Exemplo da tabela "Music" com chaves primárias compostas</figcaption>
 </figure>
-</br></br>
+</br>
 
-## Arquitetura
-
-O ADDB armazena todos os seus dados em "blocos" de memória chamados de "partitions" ou particões. O endereçamento desses dados funciona como um hash-map, onde cada elemento terá uma partition alvo e essas partitions são distribuídas e replicadas em diversos servidores da AWS da região.
+O ADDB armazena todos os seus dados em "blocos" de memória chamados de "partitions" ou partições. O endereçamento desses dados funciona como um hash-map, onde cada elemento terá uma partição alvo e essas partições são distribuídas e replicadas em diversos servidores da AWS da região configurada.
 
 ### Partição
 
-O AWS aloca máquinas o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
+A AWS aloca máquinas para o banco de dados de acordo com a demanda e cada máquina que participa do "cluster" recebe uma "tag" com um valor inteiro no intervalo [0,2^64). Quando ocorre uma requisição para inserção de dados no banco, a chave do elemento passa por uma função hash que retorna um inteiro no intervalo anterior, o dado é então guardado na primeira máquina encontrada, a busca pela máquina é realizada em um esquema de "relógio" de acordo com a imagem seguinte.
 
 </br></br>
 <figure class="image">
@@ -52,7 +49,7 @@ O AWS aloca máquinas o banco de dados de acordo com a demanda e cada máquina q
 
 No exemplo da imagem acima, se a função hash retornar 100000, o dado será armazenado na máquina A.
 
-Caso uma máquina fique sobrecarregada de dados o AWS aloca máquinas adicionais para o banco. A nova máquina armazenará todos os dados do seu novo intervalo.
+Caso uma máquina fique sobrecarregada de dados a AWS aloca máquinas adicionais para o banco. A nova máquina armazenará todos os dados do seu novo intervalo.
 
 </br></br>
 <figure class="image">
@@ -61,7 +58,7 @@ Caso uma máquina fique sobrecarregada de dados o AWS aloca máquinas adicionais
 </figure>
 </br></br>
 
-No exemplo acima todos os dados entre os endereços 10000 e 15000 seão transferidos para a máquina D. Caso uma máquina fique subutilizada, o banco pode remover uma máquina e transferir seus dados para a próxima máquina.
+No exemplo acima todos os dados entre os endereços 10000 e 15000 serão transferidos para a máquina D. Caso uma máquina fique subutilizada, o banco pode remover uma máquina e transferir seus dados para a próxima máquina.
 
 ### Replicação
 
@@ -82,24 +79,23 @@ Para garantir que a operação seja um sucesso, o valor de R+W deve ser superior
 
 ## Otimização
 
-Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada ``partition key``, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
+Como explicado anteriormente, todo elemento de uma tabela possui uma chave primária chamada partition key, e essa chave passa por uma função hash para definir em qual partição o elemento será guardado.
 
-</br></br>
+</br>
 <figure class="image">
     <img src="imagens\DataDistributionPK.png" alt='Exemplo de alocação de um elemento em uma partition'>
-    <figcaption>Exemplo de alocação de um elemento em uma partição</figcaption>
+    <figcaption>Exemplo de alocação de um elemento em uma partição.</figcaption>
 </figure>
-</br></br>
+</br>
 
-Se o elemento possuir uma chave secundária, ou ``Sort Key``, serão alocados para a mesma partição todos os elementos com a mesma ``partition key`` e estes estarão ordenados pela sua ``sort key``.
+Se o elemento possuir uma chave secundária, serão alocados para a mesma partição todos os elementos com a mesma partition key e estes estarão ordenados pela sua sort key.
 
-</br></br>
+</br>
 <figure class="image">
     <img src="imagens\DataDistributionSK.png" alt='Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key'>
-    <figcaption>Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key</figcaption>
+    <figcaption>Exemplo de alocação de um elemento em uma partição e ordenado pela sua sort key.</figcaption>
 </figure>
-</br></br>
-
+</br>
 
 Porém, caso você queira ordenar de maneira diferente e restringir os atributos projetados, pode-se criar uma _secondary index_, que é diferente do conceito de index de um banco relacional. Quando você cria a *secondary index* deve-se criar uma *partition key* (caso seja uma global, que será explicado a seguir) e uma sort key e defini-las. Após a criação, pode-se fazer uma query ou um scan igual como seria feito em uma tabela. ADDB não tem um otimizador de queries, então o _secondary index_ é usado apenas quando se faz uma _query_ ou um _scan_ nele mesmo.
 Quando é gerado uma *secondary index*, uma outra tabela é criada com as chaves definidas, além da *primary key* da tabela original, ou seja, no final, mesmo tendo definido apenas duas chaves, a nova tabela terá 3.
@@ -136,7 +132,7 @@ Você deve prover os seguintes parâmetros para a `UpdateTable`
 
   * ``Projection`` - atributos da tabela que são copiados para o índice. Neste caso, ALL significa que todos os atributos são copiados. Pode ser INCLUDE e definir certos atributos ou KEYS_ONLY para ser apenas chaves.
 
-  * ``ProvisionedThroughput`` (para tabelas definidas)- o número de leituras e gravações por segundo que você precisa para este índice. (Isso é separado das configurações de throughput provisionado da tabela.)
+  * ``ProvisionedThroughput`` - o número de leituras e gravações por segundo que você precisa para este índice. Isso é separado das configurações de throughput provisionado da tabela.
 
 ### Exemplo de criação de um index
 
@@ -144,23 +140,23 @@ Pode-se adicionar uma index global em uma tabela existente, usando a ação Upda
 
 ``` JSON
 {
-  TableName: "Music",
-  AttributeDefinitions:[
-    {AttributeName: "Genre", AttributeType: "S"},
-    {AttributeName: "Price", AttributeType: "N"}
+  "TableName": "Music",
+  "AttributeDefinitions":[
+    {"AttributeName": "Genre", "AttributeType": "S"},
+    {"AttributeName": "Price", "AttributeType": "N"}
   ],
-  GlobalSecondaryIndexUpdates: [
+  "GlobalSecondaryIndexUpdates": [
     {
-      Create: {
-        IndexName: "GenreAndPriceIndex",
-        KeySchema: [
-          {AttributeName: "Genre", KeyType: "HASH"}, //Partition key
-          {AttributeName: "Price", KeyType: "RANGE"}, //Sort key
+      "Create": {
+        "IndexName": "GenreAndPriceIndex",
+        "KeySchema": [
+          {"AttributeName": "Genre", "KeyType": "HASH"}, //Partition key
+          {"AttributeName": "Price", "KeyType": "RANGE"}, //Sort key
         ],
-        Projection: {
+        "Projection": {
           "ProjectionType": "ALL"
         },
-        ProvisionedThroughput: { // Only specified if using provisioned mode
+        "ProvisionedThroughput": { // Only specified if using provisioned mode
           "ReadCapacityUnits": 1,"WriteCapacityUnits": 1
         }
       }
@@ -172,16 +168,16 @@ Pode-se adicionar uma index global em uma tabela existente, usando a ação Upda
 Retirado da documentação do DynamoDB 
 ```
 
-## Consultas 
+## Consultas
 
 A operação de consulta no Amazon DynamoDB encontra itens com base em valores de chave primária.
 
-Você deve fornecer o nome do atributo da chave primaria e um único valor para esse atributo.
-A Query retorna todos os itens com esse valor de chave primaria. 
-Opcionalmente, você pode fornecer um atributo de sort key(chave de ordenação) e 
+Você deve fornecer o nome do atributo da chave primária e um único valor para esse atributo.
+A Query retorna todos os itens com esse valor de chave primária.
+Opcionalmente, você pode fornecer um atributo de sort key (chave de ordenação) e
 usar um operador de comparação para refinar os resultados da pesquisa.
 
-### KeyConditionExpression:
+### KeyConditionExpression
 
 ```txt
 aws dynamodb query \
@@ -190,7 +186,7 @@ aws dynamodb query \
     --expression-attribute-values  file://values.json
 ```
 
-Os argumentos para --expression-attribute-values estao armazenados no arquivo values.json abaixo.
+Os argumentos para --expression-attribute-values estão armazenados no arquivo values.json abaixo.
 
 ```JSON
 {
@@ -202,18 +198,17 @@ Que é uma string que determina os itens a serem lidos da tabela ou índice. (Ex
 
 **Deve-se especificar o nome e o valor da chave primária como uma condição de igualdade.**
 
-Pode-se usar qualquer atributo numa KeyConditionExpression, desde que o primeiro caracter seja
-[a-z] ou [A-Z].
+Pode-se usar qualquer atributo numa KeyConditionExpression, desde que o primeiro caractere seja [a-z] ou [A-Z].
 
-Para items com uma chave primaria entregue,  DynamoDB armazena esses itens juntos,
+Para items com uma chave primária entregue,  DynamoDB armazena esses itens juntos,
 em ordem de classificação por valor de sort key. Numa operação de Query, DynamoDB
 recupera os itens de maneira organizada e então processa os itens usando as condições do
 ``KeyConditionExpression`` e qualquer "FilterExpression" que pode ser presente.
 Só então o resultado da Query é mandado de volta pra o cliente.
 
 Os resultados da Query são sempre classificados pelo valor da sort key.
-Se o tipo de dados da sort key for numero, os resultados serão retornados em ordem numérica.
-Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética).Por padrão, a ordem de classificação é crescente.
+Se o tipo de dados da sort key for número, os resultados serão retornados em ordem numérica.
+Caso contrário, os resultados são retornados na ordem de bytes UTF-8(alfabética). Por padrão, a ordem de classificação é crescente.
 
 Uma única operação na Query pode recuperar no máximo 1 MB de dados. 
 Esse limite se aplica antes que qualquer "FilterExpression" seja aplicado aos resultados.
@@ -228,6 +223,7 @@ aws dynamodb query \
     --expression-attribute-names '{"#v": "Views"}' \
     --expression-attribute-values file://values.json
 ```
+
 Os argumentos para --expression-attribute-values estao armazenados no arquivo values.json abaixo.
 
 ```JSON
@@ -237,16 +233,13 @@ Os argumentos para --expression-attribute-values estao armazenados no arquivo va
     ":num":{"N":"3"}
 }
 ```
-Se você precisar refinar ainda mais os resultados da Query,
-poderá fornecer, opcionalmente, uma ``FilterExpression``.Ela determina quais itens nos resultados
-da consulta devem ser retornados para o usuário. 
-Todos os outros resultados são descartados.( Ex: "#v >= :num" )
+
+Se você precisar refinar ainda mais os resultados da Query, poderá fornecer, opcionalmente, uma ``FilterExpression``.Ela determina quais itens nos resultados da consulta devem ser retornados para o usuário. Todos os outros resultados são descartados. Exemplo: "#v >= :num"
 
 Ela é aplicada depois que a consulta é terminada, mas antes dos resultados serem retornados.
-Portanto, uma consulta consome a mesma quantidade de capacidade de leitura, 
-independentemente da presença de uma expressão de filtro.
+Portanto, uma consulta consome a mesma quantidade de capacidade de leitura, independentemente da presença de uma expressão de filtro.
 
-Uma ``FilterExpression`` não pode conter chave primaria ou atributos de sort key. 
+Uma ``FilterExpression`` não pode conter chave primária ou atributos de sort key. 
 Você precisa especificar esses atributos na ``KeyConditionExpression``, não na expressão de filtro.
 
 A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpression``.
@@ -254,8 +247,9 @@ A sintaxe de uma ``FilterExpression``  é idêntica à de uma ``KeyConditionExpr
 ## Transações
 
 Com as transações da Amazon DynamoDB, você pode agrupar várias ações e submetê-las como uma única operação de tudo-ou-nada com a TransactWriteItems ou TransactGetItems. Ambas com um limite de 25 itens distintos sendo requisitados ou alterados. 
-Caso seja preciso que a transação seja feita ainda que algumas requisições falhem, pode-se usar chamadas de funções depreciadas que a Amazon não recomenda o uso, o BatchWriteItem e o BatchGetItem, onde a primeira tem um limite de 100 alterações e o segundo de 25. 
+Caso seja preciso que a transação seja feita ainda que algumas requisições falhem, pode-se usar chamadas de funções depreciadas que a Amazon não recomenda o uso, o BatchWriteItem e o BatchGetItem, onde a primeira tem um limite de 100 alterações e o segundo de 25.
 Caso seja necessário verificar se a requisição é idempotente. Precisa-se ter um *client token* que funciona por 10 minutos, assim, pode-se verificar se o item dentro da transação de fato foi alterado. Apenas o TransactWriteItems aceita essa funcionalidade. Se qualquer parâmetro for diferente, o dynamoDB retornará um erro.
+As transações custam 2x mais no consumo da capacidade, ou seja, se for usado 2kb em um item, na verdade, será gasto 4kb.
 
 ### TransactWriteItems
 
@@ -307,6 +301,33 @@ As transações lidas não têm sucesso sob as seguintes circunstâncias:
 
 * Read-Commited
 
+### Exemplo de TransactWriteItem
+
+#### AWS cli
+
+``` text
+aws dynamodb transact-write-items
+    --transact-items file://transact-items.json
+```
+
+#### JSON de entrada Trasact-items
+
+``` JSON
+[
+  {
+    "Put": {
+      "TableName": "Music",
+      "Item": {
+        "Artist": { "S": "Rhapsody of Fire" },
+        "SongTitle": { "S": "Dawn of Victory" },
+        "Genre": { "S": "Symphonic Power Metal"}
+      },
+      "ConditionExpression": "attribute_not_exists(Artist)"
+    }
+  }
+]
+```
+
 ## Controle de Concorrência
 
 ### Optimistic locking
@@ -339,9 +360,8 @@ Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqu
 
 
 ## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
-[Database security](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/security.html)
 
-## Proteção de Dados em DynamoDB
+### Proteção de Dados em DynamoDB
 
 A AmazonDB fornece uma infarestrutura de armazenagem resiliente projetada para armazenamento de dados de missão crítica e primários. Os dados são armazenados de maneira redundante, em vários dispositivos de diversas instalações em uma região do _Amazon DynamoDB_.
 
@@ -362,6 +382,7 @@ Ao acessar ua tabela criptografada, o _DynamoDB_ descriptografa os dadosda tabel
 ---------------------------------------------
 
 ## Backup e Restauração
+
 o ADDB oferece duas formas de back-up a partir da AWS, Point-in-time backup e On-demand backup, ambos descritos a seguir.
 
 ### Point-in-time backup
@@ -403,11 +424,13 @@ aws dynamodb create-backup --table-name Music \
  --backup-name MusicBackup
 ```
 
-O backup on-demand é criado de maneira assíncrona, ò usuário ainda pode executar querys nas tabelas que estão sendo salvas, mas não é possível pausar ou cancelar a operação e remover a tabela.<br><br>
+O backup on-demand é criado de maneira assíncrona, o usuário ainda pode executar querys nas tabelas que estão sendo salvas, mas não é possível pausar ou cancelar a operação e remover a tabela.<br>
 Após a criação do backup é possível listar todos backups:
+
 ```txt
 aws dynamodb list-backups
 ```
+
 E por fim é possível restaurar a tabela Music:
 
 ```txt
@@ -421,17 +444,16 @@ Temos duas formas de fazer [backup](https://docs.aws.amazon.com/amazondynamodb/l
 A on-demand tem que fazer o [backup](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Backup.Tutorial.html) e o [restore](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Restore.Tutorial.html).
 <<<<<<< HEAD
 A point-int-time o backup é automatico e o [restore](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.Tutorial.html) pode ser por console ou AWS CLI -->
-=======
 
-## Prática: instalação do BD localmente;
+## Instalação do DynamoDB localmente
 
-
-para instalar o aws-cli:
+Para instalar o aws-cli:
 
 1) Tem que instalar o java jdk e jre>8
 2) https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html
 
-para configurar o aws cli
+Para configurar o aws cli
+
 ``` txt
 aws configure
     AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
@@ -439,12 +461,15 @@ aws configure
     Default region name [None]: us-west-2
     Default output format [None]: json
 ```
-pra rodar o servidor do banco localmente:
+
+Para rodar o servidor do banco localmente:
+
 ``` txt
 java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 ```
 
-para listar as tabelas:
+Para listar as tabelas:
+
 ``` txt
 aws dynamodb list-tables --endpoint-url http://localhost:8000
 ```
@@ -453,7 +478,8 @@ esse localhost tem que ter em todas as queries pq ta local
 
 o banco ja tem um default que ele usa quando voce omite o sharedDb
 
-para criar o tabela:
+Para criar o tabela:
+
 ``` txt
 aws dynamodb create-table
     --table-name Music
@@ -465,7 +491,8 @@ aws dynamodb create-table
         AttributeName=SongTitle,KeyType=RANGE
 ```
 
-para fazer queries
+Para fazer queries
+
 ``` txt
 aws dynamodb batch-write-item --request-items file://Forum.json
 ```
@@ -509,4 +536,7 @@ aws dynamodb batch-write-item --request-items file://Forum.json
 <li>Amazon DynamoDB. Read Consistency. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html. Acesso em Maio 2021</li>
 <li>Medium. The Architecture of Amazon’s DynamoDB and Why Its Performance Is So High. Disponível em: https://medium.com/swlh/architecture-of-amazons-dynamodb-and-why-its-performance-is-so-high-31d4274c3129#:~:text=DynamoDB. Acesso em Abril 2021</li>
 <li>Amazon DynamoDB Transactions: How It Works. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html</li>
+<li>Security and Compliance in Amazon DynamoDB. Disponível em: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/security.html</li>
+<li>Understanding DynamoDB Condition Expressions. Disponível em: https://www.alexdebrie.com/posts/dynamodb-condition-expressions/#1-confirming-existence-or-non-existence-of-an-item</li>
+<li>DynamoDB Transactions: Use Cases and Examples. Disponível em: https://www.alexdebrie.com/posts/dynamodb-transactions/ </li>
 </ol>
