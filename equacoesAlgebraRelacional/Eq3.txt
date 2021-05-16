@@ -1,3 +1,0 @@
-clienteBrinquedo \leftarrow \delta _{Brinquedos\_cod\_brinquedo \rightarrow cod_brinquedo}(\Pi _{cartao\_cobranca\_cliente\_CPF, Brinquedos\_cod\_brinquedo}(Cartao\_cobranca\_brinquedos)) \\ \\
-listaBrinquedos \leftarrow \Pi _{cod\_brinquedo}Brinquedos \\ \\
-clientesQueVisitaramTodosOsBrinquedos \leftarrow  clienteBrinquedo \div listaBrinquedos

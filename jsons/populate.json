@@ -1,0 +1,11 @@
+[
+    {
+        "TableName": "Music",
+        "Item": {
+            "Artist": { "S": "Rhapsody of Fire" },
+            "SongTitle": { "S": "Dawn of Victory" },
+            "Genre": { "S": "Symphonic Power Metal"}
+        },
+        "ConditionExpression": "attribute_not_exists(Artist)"
+    }
+]

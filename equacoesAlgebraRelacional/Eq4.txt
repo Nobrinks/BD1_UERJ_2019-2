@@ -1,7 +1,0 @@
-FC \leftarrow Funcionarios \cap Clientes \\ \\
-brinquedosV \leftarrow \Pi _{Brinquedo\_cod\_brinquedo, Cartao\_cobranca\_cliente\_CPF} (Cartao\_cobranca\_brinquedo) \\ \\
-brinquedosT \leftarrow \Pi _{Brinquedo\_cod\_brinquedo, Funcionario\_CPF} (Funcionario\_brinquedo ) \\ \\
-\delta _{Brinquedos\_cod\_brinquedo \rightarrow cod\_brinquedo, Cartao\_cobranca\_cliente\_CPF \rightarrow CPF}(brinquedosV) \\ \\
-\delta _{Brinquedos\_cod\_brinquedo \rightarrow cod\_brinquedo, Funcionario\_CPF \rightarrow CPF}(brinquedosT) \\ \\
-brinquedosVT \leftarrow \Pi _{CPF} (brinquedosV\cap brinquedosT) \\ \\
-Nomes \leftarrow \Pi _{Nome}(FC \Join _{FC.cpf = brinquedosVT.cpf} BrinquedosVT)

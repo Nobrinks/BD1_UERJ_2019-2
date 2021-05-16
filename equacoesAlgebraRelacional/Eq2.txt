@@ -1,6 +1,0 @@
-Dennis \leftarrow \sigma _{nome = 'Dennis Ribeiro'}(Funcionarios) \\ \\
-brinquedosDennis \leftarrow \Pi _{cod\_brinquedo}(Dennis \Join _{CPF = Funcionarios\_CPF}Funcionarios\_brinquedos) \\ \\
-visitasBrinquedos \leftarrow \sigma _{Cartao\_Cobranca\_Data>'31/05/2019' AND 
-Cartao\_Cobranca\_Data<'01/07/2019'}(brinquedosDennis \Join _{cod\_brinquedo = Brinquedos\_cod\_brinquedo} Cartao\_cobranca\_brinquedo) \\ \\
-precoBrinquedos \leftarrow visitasBrinquedos \Join Brinquedos \\ \\
-salarioDennis \leftarrow \Pi_{preco+500}(g_{sum(preco)}(\Pi _{cod_brinquedo, hora, data, preco *0.02})) 
