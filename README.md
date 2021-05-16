@@ -358,9 +358,6 @@ A implementação de um _distributed locking_ é difícil de se conseguir porque
 
 Uma solução para o _distributed lock_ involve gravar o atual detentor do bloqueio (_holder lock_), o processo que está impedindo os demais processos de executarem. Enquanto processos concorrentes tentam ser os próximos detentores do bloqueio. Uma desvantagem desta abordagem é que um processo poderia estar sem sorte enquanto outros seriam muito sortudos. O primeiro processo que não puder se tornar o _holder lock_, aguarda por um certo tempo, e após este tempo ele percebe que outro processo vai tomar a sua frente, impedindo esse processo inicial. Isto pode continuar indefinidamente, levando o processo a sofrer de starvation.
 
-
-## Teoria: descrever sobre a segurança no BD, controle de acesso, concessão e revogação de privilégio, existência ou não de criptografia de dados;
-
 ### Proteção de Dados em DynamoDB
 
 A AmazonDB fornece uma infarestrutura de armazenagem resiliente projetada para armazenamento de dados de missão crítica e primários. Os dados são armazenados de maneira redundante, em vários dispositivos de diversas instalações em uma região do _Amazon DynamoDB_.
@@ -377,6 +374,65 @@ Ao criar uma nova tabela, pode-se escolher uma das seguintes chaves mestras do c
 * CMK gerenciada pelo cliente - a chave é armazenada na conta e criada, detetida e gerenciada pelo cliente.
 
 Ao acessar ua tabela criptografada, o _DynamoDB_ descriptografa os dadosda tabela transparentemente.
+
+### Identity and Access Management
+
+Administradores IAM controlam quem opde ser autenticado (conectado) e autorizado (tem permissão) para usar os recursos da _Amazon DynamoDB_. Pode-se usar a AWS _Identity and Access Management_ (IAM) para gerenciar as permissões de acesso e implementar políticas de segurança para ambos _Amazon DynamoDB_ and _DynamoDB Accelerator_ (DAX).
+
+### Controle de Acesso
+
+Pode se ter credenciais válidas para autenticar as requisições, mas a não ser que tenha permissões não se pode criar ou acessar os recursos da _Amazon DynamoDB_. Por exemplo, se faz necessário ter permissões para criar uma tabela na _Amazon DynamoDB_.
+
+### Visão Geral do Gerenciamento de Permissões de Acesso aos Recursos da Amazon DynamoDB
+
+Uma conta de administrador pode anexar políticas de permissões às identidades IAM e alguns serviços também permitem que se atribuam políticas de permissões aos recursos.
+Ao conceder permissões, pode-se escolher quem recebe as permissões, os recursos relacionados às permissões concedidas e as ações específicas que se deseja permitir nesses recursos.
+
+### Recursos e operações do DynamoDB
+
+No _DynamoDB_ os recursos primários são as tabelas. Ele também suporta tipos de recursos adicionais, _indexes_ e _streams_. Contudo, pode-se criar _indexes_ e _streams_ apenas no contexto de uma tabela existente do _DynamoDB_. Estes são considerados como sub-recursos.
+
+### Entendendo Propriedade dos Recursos
+
+O proprietário dos recursos é a conta AWS da entidade principal (seja uma conta de usuário root da AWS, um usuário IAM ou função IAM) que autentique o pedido de criação dos recursos.
+
+* Contade usuário root da AWS – se utilizar das credenciais deste tipo de conta para criar uma tabela, a conta AWS será a proprietárias dos recursos (no _DynamoDB_, a tabela).
+* usuário IAM – ao criar uma conta usuário IAM dentro da conta AWS e conceder permissões para criação de tabelas a este usuário, ele poderá criá-las mas os recursos da tabela pertencerão a conta.
+* IAM user – ao criar uma função IAM dentro da conta AWS e conceder permissões para criação de tabelas a esta função, ele poderá criá-las mas os recursos da tabela pertencerão a conta.
+
+### Gerenciamento de Acesso a Recursos
+
+Uma poítica de permissões define quem tem acesso a que. Políticas anexadas a uma identidade IAM são conhecidas como plíticas baseadas em identidade (políticas IAM). Políticas atreladas a um recurso são consideradas como políticas baseadas em recursos. _DynamoDB_ suporta apenas políticas baseadas em identidade.
+
+#### Políticas Baseadas em Identidade (Política IAM)
+
+* Associar políticas de permissões a um usuário ou grupo – pode-se associar políticas de permissões a um usuário ou grupo ao qual o usuário pertence para criação de recursos da _Amazon DynamoDB_.
+* Associar políticas de permissões a um função (concede permissões entre contas) – pode-se associar uma política de permissões baseada em identidade a uma função do IAM para conceder permissões entre contas. Por exemplo, o administrador na conta A pode criar uma função para conceder permissões entre contas a outra conta da AWS (por exemplo, conta B) ou um serviço da AWS da seguinte forma:
+
+  1. O administrador da Conta A cria uma função do IAM e anexa uma política de permissões à função que concede permissões em recursos da conta A.
+
+  2. Um administrador da conta A anexa uma política de confiança à função identificando a conta B como a principal, que pode assumir a função.
+
+  3. O administrador da conta B pode acabar delegando permissões para assumir a função para todos os usuários na conta B. Isso permite que os usuários na conta B criem ou acessem recursos na conta A. O principal na política de confiança também poderá ser um serviço da AWS principal se você quiser conceder a um serviço da AWS permissões para assumir a função.
+
+Veja a seguir um exemplo de política que concede permissões para uma ação do DynamoDB (dynamodb:ListTables). O caractere curinga (*) no valor Resource significa que você pode usar esta ação para obter os nomes de todas as tabelas de propriedade da conta da AWS na região da AWS atual.
+
+``` JSON
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListTables",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:ListTables"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 <br>
 
 ---------------------------------------------
