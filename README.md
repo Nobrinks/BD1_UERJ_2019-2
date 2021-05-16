@@ -435,6 +435,17 @@ Veja a seguir um exemplo de política que concede permissões para uma ação do
 }
 ```
 
+O comando a seguir cria um usuário IAM chamado Bob na conta atual:
+```aws iam create-user --user-name Bob```
+
+O comando a seguir associa a política de gerencia da AWS nomeada ```AdminisratorAccess``` ao usuário IAM chamado Alice
+
+```aws iam attach-user-policy --policy-arn arn:aws:iam:ACCOUNT-ID:aws:policy/AdministratorAccess --user-name Alice```
+
+O exemplo a a seguir remove a política de gerencia com o ARN (Amazon Resource Names) ```arn:aws:iam::123456789012:policy/TesterPolicy``` do usuário Bob:
+
+```aws iam detach-user-policy --user-name Bob --policy-arn arn:aws:iam::123456789012:policy/TesterPolicy```
+
 <br>
 
 ---------------------------------------------
