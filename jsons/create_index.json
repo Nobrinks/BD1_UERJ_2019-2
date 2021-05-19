@@ -1,0 +1,13 @@
+[
+    {
+        "Create": {
+            "IndexName": "SongTitleIndex",
+            "KeySchema": [{
+                "AttributeName":"Song",
+                "KeyType":"Range"
+                }
+            ],
+            "Projection": { "ProjectionType":"Album" }
+        }
+    }
+]
