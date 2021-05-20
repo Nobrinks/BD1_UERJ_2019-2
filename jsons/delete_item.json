@@ -1,0 +1,7 @@
+{
+    "TableName": "Music",
+    "Key": {
+        "Artist": "Djavan",
+        "Album": "Luz"
+    }
+}

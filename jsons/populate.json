@@ -5,45 +5,15 @@
             "Item": {
                 "Artist": { "S": "Rhapsody of Fire" },
                 "Album": { "S": "Dawn of Victory" },
-                "Song": { "S": "Dawn of Victory"},
                 "Genre": { "S": "Symphonic Power Metal"},
-                "Duration": { "S": "4:47"}
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rhapsody of Fire" },
-                "Album": { "S": "Dawn of Victory" },
-                "Song": { "S": "Triumph for my Magic Steel"},
-                "Genre": { "S": "Symphonic Power Metal"}
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rhapsody of Fire" },
-                "Album": { "S": "Dawn of Victory" },
-                "Song": { "S": "The Village of Dwarves"},
-                "Genre": { "S": "Symphonic Power Metal"}
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rhapsody of Fire" },
-                "Album": { "S": "Dawn of Victory" },
-                "Song": { "S": "Dargor, Shadowlord of the Black Mountain"},
-                "Genre": { "S": "Symphonic Power Metal"}
+                "TrackList": {
+                    "L":[
+                        { "M": {"Track": {"S": "Dawn of Victory"}, "Duration": { "S": "4:47"}}},
+                        { "M": { "Track": {"S": "Triumph for my Magic Steel"}}},
+                        { "M": { "Track": {"S": "The Village of Dwarves"}}},
+                        { "M": { "Track": {"S": "Dargor, Shadowlord of the Black Mountain"}}}
+                    ]
+                }
             },
             "ConditionExpression": "attribute_not_exists(Artist)"
         }
@@ -54,33 +24,14 @@
             "Item": {
                 "Artist": { "S": "Rhapsody of Fire" },
                 "Album": { "S": "Symphony of the Enchanted Lands" },
-                "Song": { "S": "Symphony of the Enchanted Lands"},
                 "Genre": { "S": "Symphonic Power Metal"},
-                "Duration": { "S": "13:16"}
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rhapsody of Fire" },
-                "Album": { "S": "Symphony of the Enchanted Lands" },
-                "Song": { "S": "Beyond the Gates of Infinity"},
-                "Genre": { "S": "Symphonic Power Metal"}
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rhapsody of Fire" },
-                "Album": { "S": "Symphony of the Enchanted Lands" },
-                "Song": { "S": "Beyond the Gates of Infinity"},
-                "Genre": { "S": "Symphonic Power Metal"}
+                "TrackList": {
+                    "L":[
+                        { "M": {"Track": {"S": "Symphony of the Enchanted Lands"}, "Duration": { "S": "13:16"}}},
+                        { "M": {"Track": {"S": "Beyond the Gates of Infinity"}}},
+                        { "M": {"Track": {"S": "Emerald Sword"}}}
+                    ]
+                }
             },
             "ConditionExpression": "attribute_not_exists(Artist)"
         }
@@ -91,39 +42,18 @@
             "Item": {
                 "Artist": { "S": "Rihanna" },
                 "Album": { "S": "Loud" },
-                "Song": { "S": "What's My Name?" },
-                "Genre": [ 
-                    { "S": "Dance-pop"},
-                    { "S": "R&B"}],
-                "Featuring": { "S": "Drake"}
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rihanna" },
-                "Album": { "S": "Loud" },
-                "Song": { "S": "Only Girl (In the World)" },
-                "Genre": [ 
-                    { "S": "Dance-pop"},
-                    { "S": "R&B"}]
-            },
-            "ConditionExpression": "attribute_not_exists(Artist)"
-        }
-    },
-    {
-        "Put": {
-            "TableName": "Music",
-            "Item": {
-                "Artist": { "S": "Rihanna" },
-                "Album": { "S": "Loud" },
-                "Song": { "S": "S&M" },
-                "Genre": [ 
-                    { "S": "Dance-pop"},
-                    { "S": "R&B"}]
+                "Genre": {
+                    "L": [ 
+                        { "S": "Dance-pop"},
+                        { "S": "R&B"}]
+                    },
+                "TrackList": {
+                    "L":[
+                        { "M": {"Track": {"S": "What's My Name?"}, "Featuring": { "S": "Drake"}}},
+                        { "M": {"Track": {"S": "Only Girl (In the World)"}}},
+                        { "M": {"Track": {"S": "S&M"}}}
+                    ]
+                }
             },
             "ConditionExpression": "attribute_not_exists(Artist)"
         }

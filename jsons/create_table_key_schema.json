@@ -1,0 +1,10 @@
+[
+    {
+        "AttributeName": "Artist",
+        "KeyType": "HASH"
+    },
+    {
+        "AttributeName": "Album",
+        "KeyType": "RANGE"
+    }
+]

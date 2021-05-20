@@ -1,13 +1,11 @@
 [
     {
         "Create": {
-            "IndexName": "SongTitleIndex",
-            "KeySchema": [{
-                "AttributeName":"Song",
-                "KeyType":"Range"
-                }
-            ],
-            "Projection": { "ProjectionType":"Album" }
+            "IndexName": "TrackTitleIndex",
+            "KeySchema": [
+                { "AttributeName":"Album", "KeyType":"HASH" }],
+            "Projection": { "ProjectionType":"INCLUDES" },
+            "ProvisionedThroughput": {"ReadCapacityUnits": 10, "WriteCapacityUnits": 5}
         }
     }
 ]

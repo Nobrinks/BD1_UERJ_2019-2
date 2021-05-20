@@ -1,6 +1,6 @@
 {
     "Artist": {"S": "Djavan"},
     "Album": {"S": "Luz"},
-    "Song": {"S": "Samurai"},
+    "Track": {"S": "Samurai"},
     "Featuring": { "S": "Stevie Wonder"}
 }

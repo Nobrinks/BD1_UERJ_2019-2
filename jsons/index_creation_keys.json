@@ -1,10 +1,6 @@
 [
     {
-        "AttributeName": "Artist",
-        "AttributeType": "S"
-    },
-    {
-        "AttributeName": "Song",
+        "AttributeName": "Album",
         "AttributeType": "S"
     }
 ]
